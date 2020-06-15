@@ -1,0 +1,18 @@
+﻿version: '3.1'
+
+services:
+
+  memester-database:
+    image: postgres:12-alpine
+    environment:
+      POSTGRES_PASSWORD: memesterdev
+    ports:
+      - "5432:5432"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: memester@club.com
+      PGADMIN_DEFAULT_PASSWORD: memesterdev
+    ports:
+      - "5781:80"
