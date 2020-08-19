@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Memester.Services", "Memest
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Memester.Database", "Memester.Database\Memester.Database.csproj", "{DC475064-2274-41B0-84E9-52808178770D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Memester.Application.Models", "Memester.Application.Models\Memester.Application.Models.csproj", "{E968571A-BA61-4A68-85FE-26D825BF6786}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{DC475064-2274-41B0-84E9-52808178770D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DC475064-2274-41B0-84E9-52808178770D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DC475064-2274-41B0-84E9-52808178770D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E968571A-BA61-4A68-85FE-26D825BF6786}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E968571A-BA61-4A68-85FE-26D825BF6786}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E968571A-BA61-4A68-85FE-26D825BF6786}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E968571A-BA61-4A68-85FE-26D825BF6786}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
