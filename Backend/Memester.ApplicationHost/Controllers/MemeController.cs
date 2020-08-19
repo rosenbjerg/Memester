@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -57,14 +58,16 @@ namespace Memester.Controllers
             }).FirstOrDefaultAsync();
         }
         
-        private static HttpClient _client = new HttpClient();
+        private static readonly HttpClient Client = new HttpClient { DefaultRequestHeaders = {{"User-Agent", "Memester"}}};
         [HttpGet("{threadId}/{memeId}/video")]
-        public async Task<IActionResult> GetMemes([FromRoute, Required]long threadId, [FromRoute, Required]long memeId)
+        public async Task<ActionResult<Stream>> GetMemesWebm([FromRoute, Required]long threadId, [FromRoute, Required]long memeId)
         {
             var memeFileId = _databaseContext.Memes.Where(m => m.Id == memeId).Select(m => m.FileId).FirstOrDefault();
-            using var response = await _client.GetAsync($"https://is2.4chan.org/wsg/{memeFileId}.webm");
+            using var response = await Client.GetAsync($"https://is2.4chan.org/wsg/{memeFileId}.webm", HttpCompletionOption.ResponseHeadersRead);
             if (!response.IsSuccessStatusCode)
-                return 
+                return NotFound();
+            await using var memeStream = await response.Content.ReadAsStreamAsync();
+            return memeStream;
         }
     }
 }
