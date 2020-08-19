@@ -2,6 +2,7 @@ import { Component, h } from "preact";
 import { Meme } from "../../models";
 import Loading from "../../components/Loading";
 import ky from "ky";
+import * as style from './style.css'
 
 interface Props {
     threadId: number;
@@ -23,9 +24,17 @@ export default class MemePage extends Component<Props, State> {
         if (!meme) return <Loading />;
 
         return (
-            <div>
-                <h2>{meme.name}</h2>
-                <video src={`/api/${threadId}/${memeId}/video`} />
+            <div class={style.wrapper}>
+                <div class={style.memeDiv}>
+                    <div class={style.memeHeader}>
+                        <div>{meme.name}</div>
+                        <div class={style.headerControls}>
+                            <div class={`${style.nextButton} material-icons`}>navigate_next</div>
+                        </div>
+                    </div>
+                    <video src={`/api/${threadId}/${memeId}/video`} />
+                    <div class={style.memeFooter}></div>
+                </div>
             </div>
         );
     }

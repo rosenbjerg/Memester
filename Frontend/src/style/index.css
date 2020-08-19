@@ -1,15 +1,26 @@
+:root{
+	--themeBlack: #000;
+	--themeDarkblue: #000b14;
+	--themeBlue: #0A1F2E;
+	--themeWhite: #DCDCDC;
+	--themeGreen: #06D6A0;
+}
+
 html, body {
 	height: 100%;
 	width: 100%;
 	padding: 0;
 	margin: 0;
-	background: #FAFAFA;
+	background: var(--themeBlack);
 	font-family: 'Helvetica Neue', arial, sans-serif;
-	font-weight: 400;
-	color: #444;
+	font-weight: 300;
+	color: var(--themeWhite);
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+	font-family: 'Roboto', sans-serif;
 }
+
+@import "fonts.css";
 
 * {
 	box-sizing: border-box;
@@ -18,3 +29,4 @@ html, body {
 #app {
 	height: 100%;
 }
+
