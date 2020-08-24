@@ -32,6 +32,7 @@ namespace Memester
             
             services.AddDbContext<DatabaseContext>(options => options.UseNpgsql(_configuration.GetConnectionString("Pgsql")));
             services.AddSingleton(typeof(ScrapingService));
+            services.AddSingleton(typeof(Random));
             services.AddScoped(typeof(IndexingService));
             services.AddMvc().AddJsonOptions(options =>
             {
