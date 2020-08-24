@@ -2,10 +2,12 @@
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Memester.Application.Model;
 using Memester.Database;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Net.Http.Headers;
@@ -61,19 +63,36 @@ namespace Memester.Controllers
         
         private static readonly HttpClient Client = new HttpClient { DefaultRequestHeaders = {{"User-Agent", "Memester"}}};
         [HttpGet("{threadId}/{memeId}/video")]
-        public async Task<IActionResult> GetMemesWebm([FromRoute, Required]long threadId, [FromRoute, Required]long memeId)
+        public async Task GetMemesWebm([FromRoute, Required]long threadId, [FromRoute, Required]long memeId)
         {
+            long offset = 0; 
+            long count = int.MaxValue;
+            var rangeHeader = HttpContext.Request.GetTypedHeaders().Range;
+            if (rangeHeader != null && rangeHeader.Ranges.Any())
+            {
+                var range = rangeHeader.Ranges.First();
+                offset = range.From ?? 0;
+                count = range.To + 1 - offset ?? int.MaxValue;
+            }
+
             var memeFileId = await _databaseContext.Memes.Where(m => m.ThreadId == threadId && m.Id == memeId).Select(m => m.FileId).SingleAsync();
             using var response = await Client.GetAsync($"https://is2.4chan.org/wsg/{memeFileId}.webm", HttpCompletionOption.ResponseHeadersRead);
-            if (!response.IsSuccessStatusCode)
-                return NotFound();
-            
-            var memeStream = await response.Content.ReadAsStreamAsync();
-            return new FileStreamResult(memeStream, new MediaTypeHeaderValue("video/webm"))
+            if (response.StatusCode != HttpStatusCode.OK && response.StatusCode != HttpStatusCode.PartialContent)
             {
-                FileDownloadName = "meme.webm",
-                EnableRangeProcessing = true
-            };
+                var errorText = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Unexpected error on proxying request for blob: {errorText}", errorText);
+                HttpContext.Response.StatusCode = (int)response.StatusCode;
+                await HttpContext.Response.CompleteAsync();
+            }
+
+            Response.Headers["Content-Disposition"] = response.Content.Headers.ContentDisposition.ToString();
+            Response.Headers["X-Content-Type-Options"] = "nosniff";
+            Response.Headers["Accept-Ranges"] = "bytes";
+            Response.ContentLength = response.Content.Headers.ContentLength;
+
+            await using var contentStream = await response.Content.ReadAsStreamAsync();
+            await contentStream.CopyToAsync(HttpContext.Response.Body);
+            await HttpContext.Response.CompleteAsync();
         }
     }
 }
