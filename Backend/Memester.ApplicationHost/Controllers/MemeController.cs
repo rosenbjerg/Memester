@@ -41,7 +41,7 @@ namespace Memester.Controllers
             return await _databaseContext.Memes.Where(m => m.ThreadId == randomThreadId && m.Id == randomMemeId).Select(t => new MemeDto
             {
                 Id = t.Id,
-                ThreadId = t.Id,
+                ThreadId = t.ThreadId,
                 ThreadName = t.Thread.Name,
                 Name = t.Name
             }).FirstOrDefaultAsync();
@@ -53,7 +53,7 @@ namespace Memester.Controllers
             return _databaseContext.Memes.Where(m => m.ThreadId == threadId && m.Id == memeId).Select(t => new MemeDto
             {
                 Id = t.Id,
-                ThreadId = t.Id,
+                ThreadId = t.ThreadId,
                 Name = t.Name
             }).FirstOrDefaultAsync();
         }
