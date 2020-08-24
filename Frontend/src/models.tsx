@@ -1,6 +1,7 @@
 
 export interface Meme {
     name: string;
+    threadId: number;
     id: number;
 }
 
@@ -14,3 +15,4 @@ export interface FullThread {
     name: string;
     memes: Meme[];
 }
+
