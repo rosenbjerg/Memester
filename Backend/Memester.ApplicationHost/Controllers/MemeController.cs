@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Memester.Controllers
 {
     [ApiController]
-    [Route("api/meme")]
+    [Route("api/memes")]
     public class MemeController : ControllerBase
     {
         private readonly DatabaseContext _databaseContext;
@@ -25,7 +25,7 @@ namespace Memester.Controllers
         }
         
         [HttpGet("")]
-        public async Task<MemeDto> GetRandomMeme([FromQuery] long? threadId)
+        public async Task<MemeIdentification> GetRandomMeme([FromQuery] long? threadId)
         {
             var threadIds = threadId != null
                 ? new[] { threadId.Value }
@@ -38,36 +38,35 @@ namespace Memester.Controllers
             var randomMemeIndex = _random.Next(0, memeIds.Length - 1);
             var randomMemeId = memeIds[randomMemeIndex];
             
-            return await _databaseContext.Memes.Where(m => m.ThreadId == randomThreadId && m.Id == randomMemeId).Select(t => new MemeDto
+            return await _databaseContext.Memes.Where(m => m.ThreadId == randomThreadId && m.Id == randomMemeId).Select(m => new MemeIdentification
             {
-                Id = t.Id,
-                ThreadId = t.ThreadId,
-                ThreadName = t.Thread.Name,
-                Name = t.Name
-            }).FirstOrDefaultAsync();
+                Id = m.Id,
+                ThreadId = m.ThreadId
+            }).SingleAsync();
         }
         
         [HttpGet("{threadId}/{memeId}")]
         public Task<MemeDto> GetMemes([FromRoute, Required]long threadId, [FromRoute, Required]long memeId)
         {
-            return _databaseContext.Memes.Where(m => m.ThreadId == threadId && m.Id == memeId).Select(t => new MemeDto
+            return _databaseContext.Memes.Where(m => m.ThreadId == threadId && m.Id == memeId).Select(m => new MemeDto
             {
-                Id = t.Id,
-                ThreadId = t.ThreadId,
-                Name = t.Name
-            }).FirstOrDefaultAsync();
+                Id = m.Id,
+                Name = m.Name,
+                FileId = m.FileId,
+                ThreadId = m.ThreadId,
+                ThreadName = m.Thread.Name
+            }).SingleAsync();
         }
         
         private static readonly HttpClient Client = new HttpClient { DefaultRequestHeaders = {{"User-Agent", "Memester"}}};
         [HttpGet("{threadId}/{memeId}/video")]
         public async Task<ActionResult<Stream>> GetMemesWebm([FromRoute, Required]long threadId, [FromRoute, Required]long memeId)
         {
-            var memeFileId = _databaseContext.Memes.Where(m => m.ThreadId == threadId && m.Id == memeId).Select(m => m.FileId).FirstOrDefault();
+            var memeFileId = await _databaseContext.Memes.Where(m => m.ThreadId == threadId && m.Id == memeId).Select(m => m.FileId).SingleAsync();
             using var response = await Client.GetAsync($"https://is2.4chan.org/wsg/{memeFileId}.webm", HttpCompletionOption.ResponseHeadersRead);
             if (!response.IsSuccessStatusCode)
                 return NotFound();
-            await using var memeStream = await response.Content.ReadAsStreamAsync();
-            return memeStream;
+            return await response.Content.ReadAsStreamAsync();
         }
     }
 }
