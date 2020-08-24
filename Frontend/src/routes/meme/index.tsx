@@ -33,7 +33,9 @@ export default class MemePage extends Component<Props, State> {
                         </div>
                     </div>
                     <video src={`/api/${threadId}/${memeId}/video`} />
-                    <div class={style.memeFooter}></div>
+                    <div class={style.memeFooter}>
+                        <button class={`${style.playButton} material-icons`}>play</button>
+                    </div>
                 </div>
             </div>
         );

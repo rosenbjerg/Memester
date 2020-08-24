@@ -21,6 +21,7 @@ html, body {
 }
 
 @import "fonts.css";
+@import "resets.css";
 
 * {
 	box-sizing: border-box;
