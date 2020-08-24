@@ -36,7 +36,7 @@ namespace Memester.Controllers
             
             var memeIds = await _databaseContext.Memes.Where(m => m.ThreadId == randomThreadId).Select(m => m.Id).ToArrayAsync();
             var randomMemeIndex = _random.Next(0, memeIds.Length - 1);
-            var randomMemeId = threadIds[randomMemeIndex];
+            var randomMemeId = memeIds[randomMemeIndex];
             
             return await _databaseContext.Memes.Where(m => m.ThreadId == randomThreadId && m.Id == randomMemeId).Select(t => new MemeDto
             {
