@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Memester.Services;
+﻿using Memester.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Memester.Controllers
@@ -15,9 +14,9 @@ namespace Memester.Controllers
             _indexingService = indexingService;
         }
         [HttpGet("run")]
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            await _indexingService.UpdateIndex();
+            _indexingService.UpdateIndex();
             return Ok();
         }
     }

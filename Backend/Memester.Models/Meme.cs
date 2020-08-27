@@ -14,6 +14,7 @@ namespace Memester.Models
         public Thread Thread { get; set; }
         public DateTime Created { get; set; }
         public int FileSize { get; set; }
+        public string FileName { get; set; }
 
         public override string ToString() => Name;
     }

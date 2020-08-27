@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Memester.Application.Model
+﻿namespace Memester.Application.Model
 {
     public class MemeDto : MemeIdentification
     {

@@ -8,7 +8,7 @@ namespace Memester.Models
         public long Id { get; set; }
         public string Name { get; set; }
         public DateTime Created { get; set; }
-        public IList<Meme> Memes { get; set; }
+        public List<Meme> Memes { get; set; }
 
         public override string ToString() => Name;
     }
