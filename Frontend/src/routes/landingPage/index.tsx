@@ -1,18 +1,14 @@
 import { Component, h } from "preact";
-import { Meme } from "../../models";
+import { Meme, MemeIdentification } from "../../models";
 import ky from "ky";
 import { route } from "preact-router";
 import Loading from "../../components/Loading";
 
 
-interface State {
-    meme?: Meme;
-}
-
-export default class LandingPage extends Component<any, State> {
+export default class LandingPage extends Component<any, any> {
     componentDidMount() {
-        ky.get(`/api/meme`)
-            .json<Meme>()
+        ky.get(`/api/memes`)
+            .json<MemeIdentification>()
             .then(meme => route(`/${meme.threadId}/${meme.id}`));
     }
 

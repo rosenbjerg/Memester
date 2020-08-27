@@ -1,6 +1,10 @@
-
-export interface Meme {
+export interface Meme extends MemeIdentification {
     name: string;
+    threadName: string;
+    fileId: number;
+}
+
+export interface MemeIdentification{
     threadId: number;
     id: number;
 }
