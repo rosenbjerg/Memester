@@ -7,6 +7,9 @@ declare namespace StyleCssNamespace {
         memeHeader: string;
         nextButton: string;
         playButton: string;
+        threadIdText: string;
+        video: string;
+        videoWrapper: string;
         wrapper: string;
     }
 }

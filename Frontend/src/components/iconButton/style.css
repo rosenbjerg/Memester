@@ -1,0 +1,15 @@
+.buttonStyle{
+    background-color: rgba(0,0,0,0);
+    color: var(--themeWhite);
+    border: none;
+    outline: none;
+
+}
+
+.buttonStyle:hover{
+    background-color: rgba(0,0,0,0.2);
+}
+
+.buttonStyle:active{
+    background-color: rgba(0,0,0,0.4);
+}

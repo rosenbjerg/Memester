@@ -3,6 +3,7 @@ import { Thread } from "../../models";
 import Loading from "../../components/Loading";
 import ky from "ky";
 import { route } from "preact-router";
+import * as style from "../meme/style.css";
 
 interface State {
     threads?: Thread[];
@@ -23,7 +24,7 @@ export default class ThreadOverviewPage extends Component<any, State> {
                 <h2>Threads</h2>
                 <ul>
                     {threads.map(thread => (
-                        <li onClick={() => route(`/${thread.id}`)} key={thread.id}>{thread.name}</li>
+                        <li class={`${style.memeLi} truncate`} onClick={() => route(`/${thread.id}`)} key={thread.id}>{thread.name}</li>
                     ))}
                 </ul>
             </div>

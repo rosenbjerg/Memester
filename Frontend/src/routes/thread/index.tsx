@@ -1,7 +1,9 @@
 import { Component, h } from "preact";
-import { FullThread, Thread } from "../../models";
+import { FullThread} from "../../models";
 import Loading from "../../components/Loading";
 import ky from "ky";
+import { route } from "preact-router";
+import * as style from "./style.css";
 
 interface Props {
     threadId: number;
@@ -26,7 +28,7 @@ export default class ThreadPage extends Component<Props, State> {
                 <h2>{thread.name}</h2>
                 <ul>
                     {thread.memes.map(m => (
-                        <li key={m.id}>{m.name}</li>
+                        <li key={m.id} onClick={() => route(`/${this.props.threadId}/${m.id}`)}>{m.name}</li>
                     ))}
                 </ul>
             </div>

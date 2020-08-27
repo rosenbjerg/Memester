@@ -4,6 +4,7 @@ import Loading from "../../components/Loading";
 import ky from "ky";
 import * as style from "./style.css";
 import { route } from "preact-router";
+import IconButton from "../../components/iconButton"
 
 interface Props {
     threadId: number;
@@ -21,7 +22,7 @@ export default class MemePage extends Component<Props, State> {
         this.loadMeme();
     }
 
-    componentDidUpdate(previousProps: Readonly<Props>, previousState: Readonly<State>, snapshot: any) {
+    componentDidUpdate(previousProps: Readonly<Props>, _previousState: Readonly<State>, _snapshot: any) {
         if(previousProps.memeId !== this.props.memeId){
             this.loadMeme();
         }
@@ -34,49 +35,45 @@ export default class MemePage extends Component<Props, State> {
     };
 
     nextMeme = () => {
-        ky.get(`/api/memes`)
+         return ky.get(`/api/memes`)
             .json<MemeIdentification>()
             .then(meme => route(`/${meme.threadId}/${meme.id}`));
     }
 
     //<video src={`/api/memes/${this.props.threadId}/${this.props.memeId}/video`} />
 
-    render({ memeId, threadId }: Props, { meme }: State) {
+    render(_:Props, { meme }: State) {
         if (!meme) return <Loading />;
 
         return (
             <div class={style.wrapper}>
                 <div class={style.memeDiv}>
                     <div class={style.memeHeader}>
-                        <div>{meme.name}</div>
+                        <div class={`${style.threadIdText} truncate`} onClick={() => route(`/${meme.threadId}`)} key={meme.threadId} tabIndex={0}>{meme.threadName}</div>
+                        <div class={`truncate`}>{meme.name}</div>
                         <div class={style.headerControls}>
-                            <button
-                                class={`${style.nextButton} material-icons`}
-                                onClick={this.nextMeme}
-                            >
-                                navigate_next
-                            </button>
+                            <IconButton icon={"navigate_next"} onClick={this.nextMeme}/>
                         </div>
                     </div>
-                    <video
-                        key={meme.id}
-                        autoPlay
-                        muted={muted}
-                        controls
-                        onVolumeChange={(x:any) => {
-                             muted = x.target.muted;
-                        }}
-                    >
-                        <source
-                            src={`https://is2.4chan.org/wsg/${meme.fileId}.webm`}
-                            type={"video/webm"}
-                        />
-                        {/*<source src={`/api/memes/${this.props.threadId}/${this.props.memeId}/video`} type={"video/webm"}/>*/}
-                    </video>
+                    <div class={style.videoWrapper}>
+                        <video
+                            className={style.video}
+                            key={meme.id}
+                            autoPlay
+                            muted={muted}
+                            controls
+                            onVolumeChange={(x: any) => {
+                                muted = x.target.muted;
+                            }}
+                        >
+                            <source
+                                src={`https://is2.4chan.org/wsg/${meme.fileId}.webm`}
+                                type={"video/webm"}
+                            />
+                            {/*<source src={`/api/memes/${this.props.threadId}/${this.props.memeId}/video`} type={"video/webm"}/>*/}
+                        </video>
+                    </div>
                     <div class={style.memeFooter}>
-                        <button class={`${style.playButton} material-icons`}>
-                            play
-                        </button>
                     </div>
                 </div>
             </div>
