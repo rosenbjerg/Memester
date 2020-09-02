@@ -1,0 +1,1 @@
+START /d ".\Development" cmd /c "TITLE @docker/memester && docker-compose down"
