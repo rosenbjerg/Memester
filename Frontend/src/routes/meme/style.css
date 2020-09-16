@@ -16,17 +16,20 @@
 }
 
 .memeHeader{
- width: 100%;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 20% auto 32px;
+    height: 40px;
+    grid-column-gap: 16px;
 }
 
 .memeHeader div{
     display: inline-block;
-    width: 100px;
-
+    width: 100%;
 }
 
 .headerControls{
-
+    align-self: end;
 }
 
 .memeFooter{
@@ -55,3 +58,4 @@
     cursor: pointer;
     text-decoration: underline;
 }
+

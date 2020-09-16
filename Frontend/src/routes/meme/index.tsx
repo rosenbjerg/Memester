@@ -52,7 +52,7 @@ export default class MemePage extends Component<Props, State> {
                         <div class={`${style.threadIdText} truncate`} onClick={() => route(`/${meme.threadId}`)} key={meme.threadId} tabIndex={0}>{meme.threadName}</div>
                         <div class={`truncate`}>{meme.name}</div>
                         <div class={style.headerControls}>
-                            <IconButton icon={"navigate_next"} onClick={this.nextMeme}/>
+                            <IconButton icon={"navigate_next"} style={'font-size: 32px'} onClick={this.nextMeme}/>
                         </div>
                     </div>
                     <div class={style.videoWrapper}>
