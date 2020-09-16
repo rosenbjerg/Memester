@@ -15,27 +15,27 @@ namespace Memester.Controllers
     [Route("api/file")]
     public class FileController : ControllerBase
     {
-        private readonly string _imageFolder;
+        private readonly string _videoFolder;
         private readonly string _snapshotFolder;
 
         public FileController(IConfiguration configuration)
         {
             var foldersSection = configuration.GetSection("Folders");
-            _imageFolder = Path.GetFullPath(foldersSection["Videos"]);
+            _videoFolder = Path.GetFullPath(foldersSection["Videos"]);
             _snapshotFolder = Path.GetFullPath(foldersSection["Snapshots"]);
         }
         
-        [HttpGet("{threadId}/{fileId}/webm")]
-        public IActionResult GetWebm([FromRoute, Required]long threadId, [FromRoute, Required]long fileId)
+        [HttpGet("webm/{threadId}/{memeId}")]
+        public IActionResult GetWebm([FromRoute, Required]long threadId, [FromRoute, Required]long memeId)
         {
-            var threadDirectory = Path.Combine(_imageFolder, $"thread{threadId}", $"{fileId}.webm");
+            var threadDirectory = Path.Combine(_videoFolder, $"thread{threadId}", $"{memeId}.webm");
             return PhysicalFile(threadDirectory, "video/webm", true);
         }
 
-        [HttpGet("{threadId}/{fileId}/snapshot")]
-        public IActionResult GetSnapshot([FromRoute, Required]long threadId, [FromRoute, Required]long fileId)
+        [HttpGet("snapshot/{threadId}/{memeId}")]
+        public IActionResult GetSnapshot([FromRoute, Required]long threadId, [FromRoute, Required]long memeId)
         {
-            var threadDirectory = Path.Combine(_snapshotFolder, $"thread{threadId}", $"{fileId}.jpeg");
+            var threadDirectory = Path.Combine(_snapshotFolder, $"thread{threadId}", $"{memeId}.jpeg");
             return PhysicalFile(threadDirectory, "image/jpeg");
         }
     }

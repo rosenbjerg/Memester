@@ -90,7 +90,7 @@ namespace Memester.Services
                     FileName = post.Filename,
                     FileSize = post.FileSize
                 };
-                if (await TryDownloadWebm(threadDirectory, snapshotDirectory, meme.FileId,meme.Id))
+                if (await TryDownloadWebm(threadDirectory, snapshotDirectory, meme.FileId, meme.Id))
                     downloadedMemes.Add(meme);
             }
 
