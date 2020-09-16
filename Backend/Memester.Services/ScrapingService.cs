@@ -60,12 +60,12 @@ namespace Memester.Services
             foreach (var memeSizePair in memeSizePairs)
             {
                 if (sum < _maxCapacityBytes) break;
-                sum -= memeSizePair.Size;
-                toDelete.Add(memeSizePair.Id);
                 var webmFile = Path.Combine(_videoFolder, $"thread{memeSizePair.ThreadId}", $"{memeSizePair.Id}.webm");
                 try
                 {
                     File.Delete(webmFile);
+                    sum -= memeSizePair.Size;
+                    toDelete.Add(memeSizePair.Id);
                 }
                 catch (Exception e)
                 {
