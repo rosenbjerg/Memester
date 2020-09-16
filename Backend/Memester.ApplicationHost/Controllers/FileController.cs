@@ -29,7 +29,7 @@ namespace Memester.Controllers
         public IActionResult GetWebm([FromRoute, Required]long threadId, [FromRoute, Required]long fileId)
         {
             var threadDirectory = Path.Combine(_imageFolder, $"thread{threadId}", $"{fileId}.webm");
-            return PhysicalFile(threadDirectory, "video/webm");
+            return PhysicalFile(threadDirectory, "video/webm", true);
         }
 
         [HttpGet("{threadId}/{fileId}/snapshot")]
