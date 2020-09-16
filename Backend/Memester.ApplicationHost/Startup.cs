@@ -1,6 +1,7 @@
 using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using FFMpegCore;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Memester.Application.Model;
@@ -29,9 +30,14 @@ namespace Memester
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            FFMpegOptions.Configure(new FFMpegOptions
+            {
+                RootDirectory = ""
+            });
+            
             services.AddSwaggerGen(c => c.SwaggerDoc("v1", new OpenApiInfo { Title = "Memester API", Version = "v1" }));
             
-            HangfireContext.EnsureRecreated(_configuration.GetConnectionString("HangfirePgsql"));
+            HangfireContext.EnsureCreated(_configuration.GetConnectionString("HangfirePgsql"));
             ConfigureHangfire(GlobalConfiguration.Configuration);
             services.AddHangfire(ConfigureHangfire);
             services.AddHangfireServer(options =>
@@ -53,7 +59,7 @@ namespace Memester
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DatabaseContext databaseContext)
         {
-            databaseContext.Database.EnsureDeleted();
+            //databaseContext.Database.EnsureDeleted();
             databaseContext.Database.EnsureCreated();
             
             if (env.IsDevelopment())

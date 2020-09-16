@@ -30,7 +30,7 @@ namespace Memester.Services
         private const string ThreadUrl = "https://a.4cdn.org/{BOARD}/thread/{THREAD}.json";
 
         public ScrapingService(DatabaseContext databaseContext, IConfiguration configuration)
-        {
+        {    
             _databaseContext = databaseContext;
             var foldersSection = configuration.GetSection("Folders");
             _imageFolder = Path.GetFullPath(foldersSection["Videos"]);
@@ -44,7 +44,7 @@ namespace Memester.Services
             var jsonStream = await response.Content.ReadAsStringAsync();
             var root = JsonSerializer.Deserialize<List<ChanThreadRoot>>(jsonStream);
             var ids = root.SelectMany(p => p.Threads.Select(t => t.Number)).ToArray();
-            foreach (var threadId in ids.Take(3))
+            foreach (var threadId in ids.Skip(1).Take(10))
                 BackgroundJob.Enqueue<ScrapingService>(service => service.IndexThread(board, threadId));
         }
         
@@ -75,7 +75,7 @@ namespace Memester.Services
             Directory.CreateDirectory(threadDirectory);
             Directory.CreateDirectory(snapshotDirectory);
             var existingMemes = await _databaseContext.Memes.Where(m => m.ThreadId == threadId).Select(m => m.Id).ToListAsync();
-            var posts = rootPost.posts.Where(p => !existingMemes.Contains(p.Number) && p.FileId != 0 && p.Extension == ".webm").ToList();
+            var posts = rootPost.posts.Where(p => !existingMemes.Contains(p.Number) && p.FileId != 0 && p.Extension == ".webm").Take(10).ToList();
             var downloadedMemes = new List<Meme>();
             foreach (var post in posts)
             {
@@ -90,7 +90,7 @@ namespace Memester.Services
                     FileName = post.Filename,
                     FileSize = post.FileSize
                 };
-                if (await TryDownloadWebm(threadDirectory, snapshotDirectory, meme.FileId))
+                if (await TryDownloadWebm(threadDirectory, snapshotDirectory, meme.FileId,meme.Id))
                     downloadedMemes.Add(meme);
             }
 
@@ -102,7 +102,7 @@ namespace Memester.Services
             await _databaseContext.SaveChangesAsync();
         }
 
-        private async Task<bool> TryDownloadWebm(string videoFolder, string snapshotFolder, long fileId)
+        private async Task<bool> TryDownloadWebm(string videoFolder, string snapshotFolder, long fileId, long memeId)
         {
             var urlsToTry = new[]
             {
@@ -115,9 +115,9 @@ namespace Memester.Services
                 using var response = await Client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
                 if (!response.IsSuccessStatusCode) continue;
                 
-                var filePath = await DownloadStream(videoFolder, fileId, response);
+                var filePath = await DownloadStream(videoFolder, fileId, memeId, response);
                 var tempFilePath = await CreateTemporarySnapshotFile(filePath);
-                var snapshotFilePath = Path.Combine(snapshotFolder, $"{fileId}.jpeg");
+                var snapshotFilePath = Path.Combine(snapshotFolder, $"{memeId}.jpeg");
                 await ResizeImage(tempFilePath, 500, 500, snapshotFilePath);
                 
                 File.Delete(tempFilePath);
@@ -148,9 +148,10 @@ namespace Memester.Services
             await Instance.FinishAsync("magick", arg);
         }
 
-        private static async Task<string> DownloadStream(string downloadFolder, long fileId, HttpResponseMessage response)
+        private static async Task<string> DownloadStream(string downloadFolder, long fileId, long memeId,
+            HttpResponseMessage response)
         {
-            var filePath = Path.Combine(downloadFolder, $"{fileId}.webm");
+            var filePath = Path.Combine(downloadFolder, $"{memeId}.webm");
             await using var inputStream = await response.Content.ReadAsStreamAsync();
             await using var outputStream = File.Create(filePath);
             await inputStream.CopyToAsync(outputStream);
