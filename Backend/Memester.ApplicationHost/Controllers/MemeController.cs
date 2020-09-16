@@ -52,7 +52,7 @@ namespace Memester.Controllers
             return _databaseContext.Memes.Where(m => m.ThreadId == threadId && m.Id == memeId).Select(m => new MemeDto
             {
                 Id = m.Id,
-                Name = m.Name,
+                Name = m.FileName,
                 FileId = m.FileId,
                 ThreadId = m.ThreadId,
                 ThreadName = m.Thread.Name

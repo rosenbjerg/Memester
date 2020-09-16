@@ -39,7 +39,7 @@ namespace Memester.Controllers
                 Name = t.Name,
                 Memes = t.Memes.Select(m => new MemeDto
                 {
-                    Name = m.Name,
+                    Name = m.FileName,
                     Id = m.Id
                 })
             }).FirstOrDefaultAsync();
