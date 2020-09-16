@@ -51,7 +51,7 @@ namespace Memester.Services
         }
         
         [Queue(JobQueues.Default)]
-        public async Task EnforceMaxSize()
+        public async Task EnforceMaxCapacity()
         {
             var memeSizePairs = await _databaseContext.Memes.OrderBy(m => m.Created).Select(m => new { Id = m.Id, ThreadId = m.ThreadId, Size = m.FileSize }).ToListAsync();
             var sum = memeSizePairs.Sum(m => (long)m.Size);
@@ -131,7 +131,7 @@ namespace Memester.Services
             thread.Memes.AddRange(downloadedMemes);
             await _databaseContext.SaveChangesAsync();
             
-            BackgroundJob.Enqueue<ScrapingService>(service => service.EnforceMaxSize());
+            BackgroundJob.Enqueue<ScrapingService>(service => service.EnforceMaxCapacity());
         }
 
         private async Task<bool> TryDownloadWebm(string videoFolder, string snapshotFolder, long fileId, long memeId)
