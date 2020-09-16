@@ -21,8 +21,9 @@ namespace Memester.Services
     public class ScrapingService
     {
         private readonly DatabaseContext _databaseContext;
-        private readonly string _imageFolder;
+        private readonly string _videoFolder;
         private readonly string _snapshotFolder;
+        private readonly long _maxCapacityBytes;
         private static readonly HttpClient Client = new HttpClient { DefaultRequestHeaders = {{"User-Agent", "Memester"}}};
         private static readonly Regex HtmlTrimmer = new Regex("<.*?>", RegexOptions.Compiled);
 
@@ -33,8 +34,9 @@ namespace Memester.Services
         {    
             _databaseContext = databaseContext;
             var foldersSection = configuration.GetSection("Folders");
-            _imageFolder = Path.GetFullPath(foldersSection["Videos"]);
+            _videoFolder = Path.GetFullPath(foldersSection["Videos"]);
             _snapshotFolder = Path.GetFullPath(foldersSection["Snapshots"]);
+            _maxCapacityBytes = long.Parse(configuration["MaxCapacityBytes"]);
         }
         
         [Queue(JobQueues.Default)]
@@ -46,6 +48,34 @@ namespace Memester.Services
             var ids = root.SelectMany(p => p.Threads.Select(t => t.Number)).ToArray();
             foreach (var threadId in ids.Skip(1))
                 BackgroundJob.Enqueue<ScrapingService>(service => service.IndexThread(board, threadId));
+        }
+        
+        [Queue(JobQueues.Default)]
+        public async Task EnforceMaxSize()
+        {
+            var memeSizePairs = await _databaseContext.Memes.OrderBy(m => m.Created).Select(m => new { Id = m.Id, ThreadId = m.ThreadId, Size = m.FileSize }).ToListAsync();
+            var sum = memeSizePairs.Sum(m => (long)m.Size);
+            var toDelete = new List<long>();
+            foreach (var memeSizePair in memeSizePairs)
+            {
+                if (sum < _maxCapacityBytes) break;
+                sum -= memeSizePair.Size;
+                toDelete.Add(memeSizePair.Id);
+                var webmFile = Path.Combine(_videoFolder, $"thread{memeSizePair.ThreadId}", $"{memeSizePair.Id}.webm");
+                try
+                {
+                    File.Delete(webmFile);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Could not delete {webmFile}: {e}");
+                    toDelete.Remove(memeSizePair.Id);
+                }
+            }
+
+            var memesToDelete = _databaseContext.Memes.Where(m => toDelete.Contains(m.Id)).ToListAsync();
+            _databaseContext.RemoveRange(memesToDelete);
+            await _databaseContext.SaveChangesAsync();
         }
         
         [Queue(JobQueues.Default)]
@@ -70,7 +100,7 @@ namespace Memester.Services
 
             thread.Memes ??= new List<Meme>();
 
-            var threadDirectory = Path.Combine(_imageFolder, $"thread{threadId}");
+            var threadDirectory = Path.Combine(_videoFolder, $"thread{threadId}");
             var snapshotDirectory = Path.Combine(_snapshotFolder, $"thread{threadId}");
             Directory.CreateDirectory(threadDirectory);
             Directory.CreateDirectory(snapshotDirectory);
@@ -100,6 +130,8 @@ namespace Memester.Services
             _databaseContext.AddRange(downloadedMemes);
             thread.Memes.AddRange(downloadedMemes);
             await _databaseContext.SaveChangesAsync();
+            
+            BackgroundJob.Enqueue<ScrapingService>(service => service.EnforceMaxSize());
         }
 
         private async Task<bool> TryDownloadWebm(string videoFolder, string snapshotFolder, long fileId, long memeId)
@@ -118,7 +150,7 @@ namespace Memester.Services
                 var filePath = await DownloadStream(videoFolder, fileId, memeId, response);
                 var tempFilePath = await CreateTemporarySnapshotFile(filePath);
                 var snapshotFilePath = Path.Combine(snapshotFolder, $"{memeId}.jpeg");
-                await ResizeImage(tempFilePath, 500, 500, snapshotFilePath);
+                await ResizeImage(tempFilePath, 200, 200, snapshotFilePath);
                 
                 File.Delete(tempFilePath);
                 return true;
