@@ -20,7 +20,7 @@ export default class ThreadPage extends Component<Props, State> {
             .then(thread => this.setState({ thread }));
     }
 
-    render(_: Props, { thread }: State) {
+    render(props: Props, { thread }: State) {
         if (thread === undefined) return <Loading />;
 
         return (
@@ -28,7 +28,12 @@ export default class ThreadPage extends Component<Props, State> {
                 <h2>{thread.name}</h2>
                 <ul>
                     {thread.memes.map(m => (
-                        <li key={m.id} onClick={() => route(`/${this.props.threadId}/${m.id}`)}>{m.name}</li>
+                        <li style={`background-image: url("/api/file/${props.threadId}/${m.id}/snapshot")`} className={`${style.name} truncate`} key={m.id} onClick={() => route(`/${this.props.threadId}/${m.id}`)} >
+                        <div className={`${style.memeoverlay}`}>
+                            <div style={"background-color: rgba(0,0,0,0.5)"}>{m.name}</div>
+
+                        </div>
+                        </li>
                     ))}
                 </ul>
             </div>

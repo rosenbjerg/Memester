@@ -11,7 +11,6 @@ export default class LandingPage extends Component<any, any> {
             .json<MemeIdentification>()
             .then(meme => route(`/${meme.threadId}/${meme.id}`));
     }
-
     render(){
         return (
             <Loading/>

@@ -19,7 +19,7 @@ export default function IconButton(props:Props){
     return(
         <button
             disabled={disabled}
-            class={`${style.buttonStyle} material-icons ${props.class || ""}`}
+            className={`${style.buttonStyle} material-icons ${props.class || ""}`}
             style={`${props.style||''}`}
             onClick={handleClick}>{props.icon}</button>
 
