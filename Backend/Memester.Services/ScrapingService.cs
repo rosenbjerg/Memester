@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -45,8 +46,8 @@ namespace Memester.Services
             var response = await Client.GetAsync(ThreadsUrl.Replace("{BOARD}", board));
             var jsonStream = await response.Content.ReadAsStringAsync();
             var root = JsonSerializer.Deserialize<List<ChanThreadRoot>>(jsonStream);
-            var ids = root.SelectMany(p => p.Threads.Select(t => t.Number)).ToArray();
-            foreach (var threadId in ids.Skip(1))
+            var ids = root.SelectMany(p => p.Threads.Select(t => t.Number)).Skip(1).Take(10).ToArray();
+            foreach (var threadId in ids)
                 BackgroundJob.Enqueue<ScrapingService>(service => service.IndexThread(board, threadId));
             BackgroundJob.Enqueue<ScrapingService>(service => service.EnforceMaxCapacity());
         }
@@ -148,11 +149,19 @@ namespace Memester.Services
                 if (!response.IsSuccessStatusCode) continue;
                 
                 var filePath = await DownloadStream(videoFolder, fileId, memeId, response);
-                var tempFilePath = await CreateTemporarySnapshotFile(filePath);
-                var snapshotFilePath = Path.Combine(snapshotFolder, $"{memeId}.jpeg");
-                await ResizeImage(tempFilePath, 200, 200, snapshotFilePath);
+                try
+                {
+                    var tempFilePath = await CreateTemporarySnapshotFile(filePath);
+                    var snapshotFilePath = Path.Combine(snapshotFolder, $"{memeId}.jpeg");
+                    await ResizeImage(tempFilePath, 200, 200, snapshotFilePath);
+                    File.Delete(tempFilePath);
+                }
+                catch (Exception)
+                {
+                    File.Delete(filePath);
+                    return false;
+                }
                 
-                File.Delete(tempFilePath);
                 return true;
             }
 
