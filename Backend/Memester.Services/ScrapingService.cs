@@ -44,7 +44,7 @@ namespace Memester.Services
             var jsonStream = await response.Content.ReadAsStringAsync();
             var root = JsonSerializer.Deserialize<List<ChanThreadRoot>>(jsonStream);
             var ids = root.SelectMany(p => p.Threads.Select(t => t.Number)).ToArray();
-            foreach (var threadId in ids.Skip(1).Take(10))
+            foreach (var threadId in ids.Skip(1))
                 BackgroundJob.Enqueue<ScrapingService>(service => service.IndexThread(board, threadId));
         }
         

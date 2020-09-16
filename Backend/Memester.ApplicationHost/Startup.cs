@@ -42,7 +42,7 @@ namespace Memester
             services.AddHangfire(ConfigureHangfire);
             services.AddHangfireServer(options =>
             {
-                options.WorkerCount = Math.Max(Environment.ProcessorCount * 2 - 1, 16);
+                options.WorkerCount = Math.Min(Environment.ProcessorCount * 2 - 1, 16);
                 options.Queues = JobQueues.All;
             });
             
