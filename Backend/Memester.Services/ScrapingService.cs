@@ -48,6 +48,7 @@ namespace Memester.Services
             var ids = root.SelectMany(p => p.Threads.Select(t => t.Number)).ToArray();
             foreach (var threadId in ids.Skip(1))
                 BackgroundJob.Enqueue<ScrapingService>(service => service.IndexThread(board, threadId));
+            BackgroundJob.Enqueue<ScrapingService>(service => service.EnforceMaxCapacity());
         }
         
         [Queue(JobQueues.Default)]
@@ -73,7 +74,7 @@ namespace Memester.Services
                 }
             }
 
-            var memesToDelete = _databaseContext.Memes.Where(m => toDelete.Contains(m.Id)).ToListAsync();
+            var memesToDelete = await _databaseContext.Memes.Where(m => toDelete.Contains(m.Id)).ToListAsync();
             _databaseContext.RemoveRange(memesToDelete);
             await _databaseContext.SaveChangesAsync();
         }
@@ -131,7 +132,6 @@ namespace Memester.Services
             thread.Memes.AddRange(downloadedMemes);
             await _databaseContext.SaveChangesAsync();
             
-            BackgroundJob.Enqueue<ScrapingService>(service => service.EnforceMaxCapacity());
         }
 
         private async Task<bool> TryDownloadWebm(string videoFolder, string snapshotFolder, long fileId, long memeId)
