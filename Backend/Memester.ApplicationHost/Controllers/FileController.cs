@@ -25,14 +25,14 @@ namespace Memester.Controllers
             _snapshotFolder = Path.GetFullPath(foldersSection["Snapshots"]);
         }
         
-        [HttpGet("webm/{threadId}/{memeId}")]
+        [HttpGet("{threadId}/{memeId}/webm")]
         public IActionResult GetWebm([FromRoute, Required]long threadId, [FromRoute, Required]long memeId)
         {
             var threadDirectory = Path.Combine(_videoFolder, $"thread{threadId}", $"{memeId}.webm");
             return PhysicalFile(threadDirectory, "video/webm", true);
         }
 
-        [HttpGet("snapshot/{threadId}/{memeId}")]
+        [HttpGet("{threadId}/{memeId}/snapshot")]
         public IActionResult GetSnapshot([FromRoute, Required]long threadId, [FromRoute, Required]long memeId)
         {
             var threadDirectory = Path.Combine(_snapshotFolder, $"thread{threadId}", $"{memeId}.jpeg");
