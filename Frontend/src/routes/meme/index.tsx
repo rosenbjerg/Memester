@@ -67,7 +67,7 @@ export default class MemePage extends Component<Props, State> {
                             }}
                         >
                             <source
-                                src={`/api/stream/${meme.threadId}/${meme.id}/video`}
+                                src={`/api/file/${meme.threadId}/${meme.id}/webm`}
                                 type={"video/webm"}
                             />
                             {/*<source src={`/api/memes/${this.props.threadId}/${this.props.memeId}/video`} type={"video/webm"}/>*/}

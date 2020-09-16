@@ -19,7 +19,14 @@
     "preact-jsx-chai": "^3.0.0",
     "preact-markup": "^2.0.0",
     "preact-render-to-string": "^5.1.4",
-    "preact-router": "^3.2.1"
+    "preact-router": "^3.2.1",
+    "axios": "^0.20.0",
+    "formik": "^2.1.4",
+    "yup": "^0.28.1",
+    "rxjs": "^6.3.3",
+    "prop-types": "^15.7.2",
+    "query-string": "^6.11.0",
+    "history": "^4.10.1"
   },
   "devDependencies": {
     "@teamsupercell/typings-for-css-modules-loader": "^2.2.0",

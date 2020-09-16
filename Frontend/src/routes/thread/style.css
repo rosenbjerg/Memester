@@ -2,3 +2,33 @@
     cursor: pointer;
     text-decoration: underline;
 }
+
+.name{
+    height: 150px;
+    width: 150px;
+    border-radius: 5px;
+    list-style: none;
+    display: inline-block;
+    margin: 8px;
+    border: lawngreen 2px;
+    background-size: cover;
+    text-decoration: #000b14;
+}
+
+.name div{
+    text-align: center;
+    width: 150px;
+}
+
+.memeoverlay{
+    height: 100%;
+    width: 100%;
+}
+
+.memeoverlay:hover{
+    background-color: rgba(0,0,0,0.2);
+}
+
+.memeoverlay:active{
+    background-color: rgba(0,0,0,0.4);
+}
