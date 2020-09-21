@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Hangfire;
 using Memester.Application.Model;
 using Memester.Core;
 using Memester.Database;
@@ -26,7 +27,7 @@ namespace Memester.Services
         }
         public async Task<(string Token, DateTime Expiry)> Login(string key, string userAgent)
         {
-            var token = await _databaseContext.LoginTokens.AsNoTracking().Include(u => u.User).FirstOrDefaultAsync(u => u.Token == key);
+            var token = await _databaseContext.LoginTokens.AsNoTracking().Include(u => u.User).FirstOrDefaultAsync(u => u.Key == key);
             if (token != null)
             {
                 var session = new Session
@@ -35,9 +36,9 @@ namespace Memester.Services
                     UserId = token.UserId,
                     Created = DateTime.UtcNow
                 };
-                await _sessionService.AddSession(token.Token, session, _sessionLength);
+                await _sessionService.AddSession(token.Key, session, _sessionLength);
                 _operationContext.Session = session;
-                return (token.Token, DateTime.UtcNow.Add(_sessionLength));
+                return (token.Key, DateTime.UtcNow.Add(_sessionLength));
             }
 
             return default;
@@ -56,15 +57,21 @@ namespace Memester.Services
             
             var loginToken = new LoginToken
             {
-                Token = TokenGenerator.Generate(),
+                Key = TokenGenerator.Generate(),
                 Expiration = DateTime.Now.AddDays(3),
                 User = user,
                 UserAgent = userAgent
             };
             _databaseContext.Add(loginToken);
             await _databaseContext.SaveChangesAsync();
+            BackgroundJob.Enqueue<AuthenticationService>(service => service.SendLoginToken(loginToken.Key));
+        }
 
-            await _emailService.Send(email, $"Login til hvaderderikantinen", $"<p>Open or click the link below to log in to hvaderderikantinen.dk</p><p><a target=\"_blank\" href=\"https://hvaderderikantinen.dk/api/authentication/login/{loginToken.Token}\">hvaderderikantinen.dk/api/authentication/login/{loginToken.Token}</a></p>");
+        public async Task SendLoginToken(string token)
+        {
+            var loginToken = await _databaseContext.LoginTokens.AsNoTracking().Include(t => t.User).SingleAsync(t => t.Key == token);
+            await _emailService.Send(loginToken.User.Email, $"Login til memester", $"<p>Open or click the link below to log in to memester.club</p><p><a target=\"_blank\" href=\"https://memester.club/api/authentication/login/{loginToken.Key}\">memester.club/api/authentication/login/{loginToken.Key}</a></p>");
+
         }
     }
 }
