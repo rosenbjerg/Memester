@@ -3,13 +3,14 @@
     public class JobQueues
     {
         public const string Default = "default";
-        public const string ThreadIndexing = "a_thread_indexing";
-        public const string BoardIndexing = "b_board_indexing";
-        public const string DiskCleanup = "c_diskcleanup";
+        public const string LoginEmails = "a_login_emails";
+        public const string ThreadIndexing = "b_thread_indexing";
+        public const string BoardIndexing = "c_board_indexing";
+        public const string DiskCleanup = "d_diskcleanup";
 
         public static string[] All => new[]
         {
-            Default, ThreadIndexing, BoardIndexing, DiskCleanup
+            Default, LoginEmails, ThreadIndexing, BoardIndexing, DiskCleanup
         };
     }
 }

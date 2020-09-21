@@ -6,7 +6,7 @@ namespace Memester.Models
     {
         public long UserId { get; set; }
         public User User { get; set; } = null!;
-        public string Token { get; set; } = null!;
+        public string Key { get; set; } = null!;
         public DateTime Expiration { get; set; }
         public DateTime Created { get; set; }
         public DateTime Updated { get; set; }

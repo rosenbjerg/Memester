@@ -31,7 +31,7 @@ namespace Memester.Database
             modelBuilder.Entity<Meme>().HasOne(m => m.Thread).WithMany(t => t.Memes).HasForeignKey(m => m.ThreadId).OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<Meme>().HasMany(m => m.Votes).WithOne(f => f.Meme).HasForeignKey(f => f.MemeId).OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<LoginToken>().HasKey(fm => fm.Token);
+            modelBuilder.Entity<LoginToken>().HasKey(fm => fm.Key);
             modelBuilder.Entity<FavoritedMeme>().HasKey(fm => new {fm.UserId, fm.MemeId});
             modelBuilder.Entity<Vote>().HasKey(fm => new {fm.UserId, fm.MemeId});
         }
