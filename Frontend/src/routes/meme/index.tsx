@@ -1,10 +1,11 @@
 import { Component, h } from "preact";
 import { Meme, MemeIdentification } from "../../models";
-import Loading from "../../components/Loading";
+import Loading from "../../components/loading";
 import ky from "ky";
 import * as style from "./style.css";
 import { route } from "preact-router";
 import IconButton from "../../components/iconButton"
+import CopiedText from "../../components/copiedText";
 
 interface Props {
     threadId: number;
@@ -43,6 +44,7 @@ export default class MemePage extends Component<Props, State> {
     //<video src={`/api/memes/${this.props.threadId}/${this.props.memeId}/video`} />
 
     render(_:Props, { meme }: State) {
+
         if (!meme) return <Loading />;
 
         return (
@@ -73,8 +75,18 @@ export default class MemePage extends Component<Props, State> {
                             {/*<source src={`/api/memes/${this.props.threadId}/${this.props.memeId}/video`} type={"video/webm"}/>*/}
                         </video>
                     </div>
-                    <div class={style.memeFooter}>
+                    <div className={`${style.memeFooter}`}>
+                        <button class={`${style.copyButton}`} onClick={function(){
+                            navigator.clipboard.writeText(window.location.href);
+                            setTimeout(function(){
+
+                            },300)
+                            return(<CopiedText/>)
+                        }}>COPY LINK!
+                        </button>
+
                     </div>
+
                 </div>
             </div>
         );

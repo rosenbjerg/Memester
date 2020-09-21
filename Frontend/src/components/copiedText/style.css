@@ -1,0 +1,19 @@
+.text{
+    position: absolute;
+    color: var(--themeGreen);
+    animation: textAnimation linear forwards;
+    animation-duration: 0.3s;
+
+    font-size: 24px;
+}
+
+@keyframes textAnimation {
+    from{
+        bottom: 0;
+        opacity: 1;
+    }
+    to{
+        bottom: 50px;
+        opacity: 0;
+    }
+}

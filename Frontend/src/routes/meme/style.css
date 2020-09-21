@@ -36,6 +36,27 @@
 
 }
 
+.copyButton{
+    margin: auto;
+    display: block;
+    color: var(--themeGreen);
+    border: var(--themeGreen) solid 1px;
+    font-size: 24px;
+}
+
+.copyButton:hover{
+    cursor: pointer;
+    color: var(--themeDarkblue);
+    border: var(--themeGreen) solid 1px;
+    background-color: var(--themeGreen);
+}
+
+.copyButton:active{
+    border: var(--themeGreen) solid 1px;
+    background-color: var(--themeGreen);
+
+}
+
 .playButton{
 
 }
