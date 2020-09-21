@@ -5,6 +5,7 @@ using FFMpegCore;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Memester.Application.Model;
+using Memester.Core;
 using Memester.Database;
 using Memester.Services;
 using Microsoft.AspNetCore.Builder;
@@ -30,6 +31,9 @@ namespace Memester
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            AddOptions<EmailOptions>(services);
+            AddOptions<Core.SessionOptions>(services);
+            
             FFMpegOptions.Configure(new FFMpegOptions
             {
                 RootDirectory = ""
@@ -50,9 +54,14 @@ namespace Memester
             
             services.AddDbContext<DatabaseContext>(options => options.UseNpgsql(_configuration.GetConnectionString("Pgsql")));
             
+            services.AddScoped(typeof(OperationContext), _ => new OperationContext());
+            services.AddScoped(typeof(IHttpSessionService), typeof(CookieSessionService));
             services.AddScoped(typeof(ScrapingService));
             services.AddScoped(typeof(IndexingService));
+            services.AddScoped(typeof(AuthenticationService));
             
+            services.AddSingleton(typeof(IEmailService), typeof(MailkitEmailService));
+            services.AddSingleton(typeof(SessionService));
             services.AddSingleton(typeof(Random));
         }
 

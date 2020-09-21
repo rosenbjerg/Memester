@@ -14,6 +14,7 @@ using Instances;
 using Memester.Application.Model;
 using Memester.Database;
 using Memester.Models;
+using Memester.Services.ChanModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
@@ -40,7 +41,7 @@ namespace Memester.Services
             _maxCapacityBytes = long.Parse(configuration["MaxCapacityBytes"]);
         }
         
-        [Queue(JobQueues.Default)]
+        [Queue(JobQueues.BoardIndexing)]
         public async Task IndexBoard(string board = "wsg")
         {
             var response = await Client.GetAsync(ThreadsUrl.Replace("{BOARD}", board));
@@ -52,7 +53,7 @@ namespace Memester.Services
             BackgroundJob.Enqueue<ScrapingService>(service => service.EnforceMaxCapacity());
         }
         
-        [Queue(JobQueues.Default)]
+        [Queue(JobQueues.DiskCleanup)]
         public async Task EnforceMaxCapacity()
         {
             var memeSizePairs = await _databaseContext.Memes.OrderBy(m => m.Created).Select(m => new { Id = m.Id, ThreadId = m.ThreadId, Size = m.FileSize }).ToListAsync();
@@ -80,7 +81,7 @@ namespace Memester.Services
             await _databaseContext.SaveChangesAsync();
         }
         
-        [Queue(JobQueues.Default)]
+        [Queue(JobQueues.ThreadIndexing)]
         public async Task IndexThread(string board, long threadId)
         {
             var rootPost = await DownloadThreadPosts(board, threadId);

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Memester.Services
+namespace Memester.Services.ChanModels
 {
     public class ChanPostRoot
     {

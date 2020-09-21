@@ -1,8 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <TargetFramework>netstandard2.1</TargetFramework>
         <RootNamespace>Memester.Application.Model</RootNamespace>
     </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Memester.Models\Memester.Models.csproj" />
+    </ItemGroup>
 
 </Project>

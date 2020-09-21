@@ -16,6 +16,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Memester.Application.Models\Memester.Application.Models.csproj" />
+      <ProjectReference Include="..\Memester.Core\Memester.Core.csproj" />
       <ProjectReference Include="..\Memester.Database\Memester.Database.csproj" />
       <ProjectReference Include="..\Memester.Models\Memester.Models.csproj" />
       <ProjectReference Include="..\Memester.Services\Memester.Services.csproj" />

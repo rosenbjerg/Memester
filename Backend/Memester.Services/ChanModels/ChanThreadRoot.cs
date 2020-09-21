@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace Memester.Services
+namespace Memester.Services.ChanModels
 {
     public class ChanThreadRoot
     {
