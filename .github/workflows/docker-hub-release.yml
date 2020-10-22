@@ -29,8 +29,6 @@ jobs:
           docker push mrosenbjerg/memester:alpine-$MEMESTER_BUILD
       -
         name: Create and push new Docker manifest
-        env:
-          DOCKER_CLI_EXPERIMENTAL: enabled
         run: |
           docker manifest create mrosenbjerg/memester:latest \
             mrosenbjerg/memester:alpine-$MEMESTER_BUILD \
