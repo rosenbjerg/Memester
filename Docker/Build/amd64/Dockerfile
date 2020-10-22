@@ -7,10 +7,10 @@ RUN git clone https://github.com/rosenbjerg/Memester.git
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-alpine AS backendBuilder
 WORKDIR /app
 COPY --from=gitCloner /project/Memester/Backend/ ./
-RUN dotnet publish Memester.Application.WebApi/Memester.Application.WebApi.csproj -c Release -r linux-musl-x64 -o build
+RUN dotnet publish Memester.ApplicationHost/Memester.ApplicationHost.csproj -c Release -r linux-musl-x64 -o build
 
 
-FROM node:13-alpine3.10 AS frontendBuilder
+FROM node:12-alpine3.10 AS frontendBuilder
 WORKDIR /app
 COPY --from=gitCloner /project/Memester/Frontend/ ./
 RUN yarn install --frozen-lockfile --no-progress --silent
