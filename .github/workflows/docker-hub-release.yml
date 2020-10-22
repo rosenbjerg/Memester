@@ -22,7 +22,7 @@ jobs:
             --build-arg "build=$MEMESTER_BUILD" \
             --output "type=image,push=false" \
             --tag $DOCKER_BUILD \
-            ./docker/gh-build/amd64
+            ./Docker/Build/AMD64
       -
         name: Push new image
         run: |
