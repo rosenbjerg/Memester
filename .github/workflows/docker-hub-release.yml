@@ -24,11 +24,11 @@ jobs:
             --tag "mrosenbjerg/memester-$MEMESTER_BUILD" \
             ./docker/gh-build/amd64
       -
-        name: Push new images
+        name: Push new image
         run: |
           docker push mrosenbjerg/memester:amd64
       -
-        name: Create and push Docker manifest
+        name: Create and push new Docker manifest
         env:
           DOCKER_CLI_EXPERIMENTAL: enabled
         run: |
