@@ -21,18 +21,18 @@ jobs:
           MEMESTER_BUILD="${GITHUB_REF_NAME/release\//}" && docker build \
             --build-arg "build=$MEMESTER_BUILD" \
             --output "type=image,push=false" \
-            --tag "mrosenbjerg/memester-$MEMESTER_BUILD" \
+            --tag mrosenbjerg/memester:$MEMESTER_BUILD \
             ./docker/gh-build/amd64
       -
         name: Push new image
         run: |
-          docker push mrosenbjerg/memester:amd64
+          docker push mrosenbjerg/memester:$MEMESTER_BUILD
       -
         name: Create and push new Docker manifest
         env:
           DOCKER_CLI_EXPERIMENTAL: enabled
         run: |
           docker manifest create mrosenbjerg/memester:latest \
-            mrosenbjerg/memester-$MEMESTER_BUILD \
-          docker manifest annotate mrosenbjerg/memester:latest mrosenbjerg/memester-$MEMESTER_BUILD --arch amd64 --os linux && \
+            mrosenbjerg/memester:$MEMESTER_BUILD \
+          docker manifest annotate mrosenbjerg/memester:latest mrosenbjerg/memester:$MEMESTER_BUILD --arch amd64 --os linux && \
           docker manifest push mrosenbjerg/memester:latest
