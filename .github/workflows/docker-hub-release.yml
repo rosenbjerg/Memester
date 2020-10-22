@@ -1,7 +1,7 @@
 name: Docker build
 
 on:
-  pull_request:
+  push:
     branches: release/*
 
 jobs:
