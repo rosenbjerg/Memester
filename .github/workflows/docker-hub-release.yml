@@ -19,7 +19,7 @@ jobs:
         name: Build AMD64 image
         run: |
           MEMESTER_BUILD="${GITHUB_REF_NAME/release\//}" && docker build \
-            --build-arg "build=$GITHUB_REF_NAME" \
+            --build-arg "build=$MEMESTER_BUILD" \
             --output "type=image,push=false" \
             --tag mrosenbjerg/memester:amd64 \
             ./docker/gh-build/amd64
