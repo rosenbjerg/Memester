@@ -18,8 +18,8 @@ jobs:
       -
         name: Build AMD64 image
         run: |
-          Memester_Build__Version=`printf '%(%y.%m.%d)T-alpha' -1` && docker build \
-            --build-arg "build=$Memester_Build__Version" \
+          docker build \
+            --build-arg "build=$GITHUB_REF_NAME" \
             --output "type=image,push=false" \
             --tag mrosenbjerg/memester:amd64 \
             ./docker/gh-build/amd64
