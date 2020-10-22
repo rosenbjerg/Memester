@@ -18,10 +18,10 @@ jobs:
       -
         name: Build AMD64 image
         run: |
-          MEMESTER_BUILD="${GITHUB_REF_NAME/release\//}" && docker build \
+          MEMESTER_BUILD="${GITHUB_REF_NAME/release\//}" && echo $MEMESTER_BUILD && docker build \
             --build-arg "build=$MEMESTER_BUILD" \
             --output "type=image,push=false" \
-            --tag mrosenbjerg/memester:$MEMESTER_BUILD-alpine \
+            --tag "mrosenbjerg/memester:$MEMESTER_BUILD-alpine" \
             ./Docker/Build/amd64
       -
         name: Push new image
