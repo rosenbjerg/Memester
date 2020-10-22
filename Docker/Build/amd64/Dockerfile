@@ -11,7 +11,6 @@ RUN dotnet publish Memester.Application.WebApi/Memester.Application.WebApi.cspro
 
 
 FROM node:13-alpine3.10 AS frontendBuilder
-RUN apk --update --no-cache --quiet add git openssh
 WORKDIR /app
 COPY --from=gitCloner /project/Memester/Frontend/ ./
 RUN yarn install --frozen-lockfile --no-progress --silent
@@ -27,7 +26,7 @@ RUN apk add --update --no-cache ffmpeg
 WORKDIR /app
 COPY --from=backendBuilder /app/build ./
 COPY --from=frontendBuilder /app/build ./public/
-ENV MEMESTER_BUILD_VERSION=$build
+ENV MEMESTER_BUILD__VERSION=$build
 ENV ASPNETCORE_URLS="http://*:5000"
 EXPOSE 5000
 ENTRYPOINT ["dotnet", "Memester.ApplicationHost.dll"]
