@@ -1,6 +1,6 @@
 import { Component, h } from "preact";
 import { Thread } from "../../models";
-import Loading from "../../components/Loading";
+import Loading from "../../components/loading";
 import ky from "ky";
 import { route } from "preact-router";
 import * as style from "../meme/style.css";
