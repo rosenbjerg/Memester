@@ -8,6 +8,7 @@ using MailKit.Net.Smtp;
 using MailKit.Security;
 using Memester.Application.Model;
 using Memester.Core;
+using Memester.Core.Options;
 using MimeKit;
 using MimeKit.Text;
 

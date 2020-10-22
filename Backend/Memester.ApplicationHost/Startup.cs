@@ -6,6 +6,7 @@ using Hangfire;
 using Hangfire.PostgreSql;
 using Memester.Application.Model;
 using Memester.Core;
+using Memester.Core.Options;
 using Memester.Database;
 using Memester.Services;
 using Microsoft.AspNetCore.Builder;
@@ -16,6 +17,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
+using SessionOptions = Memester.Core.Options.SessionOptions;
 
 namespace Memester
 {
@@ -32,7 +34,7 @@ namespace Memester
         public void ConfigureServices(IServiceCollection services)
         {
             AddOptions<EmailOptions>(services);
-            AddOptions<Core.SessionOptions>(services);
+            AddOptions<SessionOptions>(services);
             
             FFMpegOptions.Configure(new FFMpegOptions
             {

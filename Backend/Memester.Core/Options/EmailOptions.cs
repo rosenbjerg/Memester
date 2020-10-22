@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace Memester.Core
+namespace Memester.Core.Options
 {
     public class EmailOptions
     {
