@@ -12,16 +12,6 @@ jobs:
         name: Checkout
         uses: actions/checkout@v1
       -
-        name: Set up Docker Buildx
-        id: buildx
-        uses: crazy-max/ghaction-docker-buildx@v1
-        with:
-          buildx-version: latest
-      -
-        name: Enable experimental Docker features
-        run: |
-          echo $'{\n    "experimental": true\n}' | sudo tee /etc/docker/daemon.json && sudo service docker restart
-      -
         name: Login to Docker Hub
         run: |
           docker login --username ${{ secrets.DOCKER_USERNAME }} --password ${{ secrets.DOCKER_PASSWORD }}
@@ -34,27 +24,9 @@ jobs:
             --tag mrosenbjerg/memester:amd64 \
             ./docker/gh-build/amd64
       -
-        name: Build ARM64v8 image
-        run: |
-          Memester_Build__Version=`printf '%(%y.%m.%d)T-alpha' -1` && docker build \
-            --build-arg "build=$Memester_Build__Version" \
-            --output "type=image,push=false" \
-            --tag mrosenbjerg/memester:arm64v8 \
-            ./docker/gh-build/arm64v8
-      -
-        name: Build ARM32v7 image
-        run: |
-          Memester_Build__Version=`printf '%(%y.%m.%d)T-alpha' -1` && docker build \
-            --build-arg "build=$Memester_Build__Version" \
-            --output "type=image,push=false" \
-            --tag mrosenbjerg/memester:arm32v7 \
-            ./docker/gh-build/arm32v7
-      -
         name: Push new images
         run: |
-          docker push mrosenbjerg/memester:amd64 && \
-          docker push mrosenbjerg/memester:arm64v8 && \
-          docker push mrosenbjerg/memester:arm32v7
+          docker push mrosenbjerg/memester:amd64
       -
         name: Create and push Docker manifest
         env:
@@ -62,9 +34,5 @@ jobs:
         run: |
           docker manifest create mrosenbjerg/memester:latest \
             mrosenbjerg/memester:amd64 \
-            mrosenbjerg/memester:arm64v8 \
-            mrosenbjerg/memester:arm32v7 && \
-          docker manifest annotate mrosenbjerg/memester:latest mrosenbjerg/nxplx-webapi:amd64 --arch amd64 --os linux && \
-          docker manifest annotate mrosenbjerg/memester:latest mrosenbjerg/nxplx-webapi:arm64v8 --arch arm64 --os linux && \
-          docker manifest annotate mrosenbjerg/memester:latest mrosenbjerg/nxplx-webapi:arm32v7 --arch arm --os linux && \
+          docker manifest annotate mrosenbjerg/memester:latest mrosenbjerg/memester:amd64 --arch amd64 --os linux && \
           docker manifest push mrosenbjerg/memester:latest
