@@ -47,7 +47,7 @@ namespace Memester.Services
             var response = await Client.GetAsync(ThreadsUrl.Replace("{BOARD}", board));
             var jsonStream = await response.Content.ReadAsStringAsync();
             var root = JsonSerializer.Deserialize<List<ChanThreadRoot>>(jsonStream);
-            var ids = root.SelectMany(p => p.Threads.Select(t => t.Number)).Skip(1).Take(10).ToArray();
+            var ids = root.SelectMany(p => p.Threads.Select(t => t.Number)).Skip(1).ToArray();
             foreach (var threadId in ids)
                 BackgroundJob.Enqueue<ScrapingService>(service => service.IndexThread(board, threadId));
             BackgroundJob.Enqueue<ScrapingService>(service => service.EnforceMaxCapacity());
@@ -56,7 +56,8 @@ namespace Memester.Services
         [Queue(JobQueues.DiskCleanup)]
         public async Task EnforceMaxCapacity()
         {
-            var memeSizePairs = await _databaseContext.Memes.OrderBy(m => m.Created).Select(m => new { Id = m.Id, ThreadId = m.ThreadId, Size = m.FileSize }).ToListAsync();
+            var memeSizePairs = await _databaseContext.Memes.OrderBy(m => m.Created)
+                .Select(m => new { Id = m.Id, ThreadId = m.ThreadId, Size = m.FileSize }).ToListAsync();
             var sum = memeSizePairs.Sum(m => (long)m.Size);
             var toDelete = new List<long>();
             foreach (var memeSizePair in memeSizePairs)
@@ -108,7 +109,7 @@ namespace Memester.Services
             Directory.CreateDirectory(threadDirectory);
             Directory.CreateDirectory(snapshotDirectory);
             var existingMemes = await _databaseContext.Memes.Where(m => m.ThreadId == threadId).Select(m => m.Id).ToListAsync();
-            var posts = rootPost.posts.Where(p => !existingMemes.Contains(p.Number) && p.FileId != 0 && p.Extension == ".webm").Take(10).ToList();
+            var posts = rootPost.posts.Where(p => !existingMemes.Contains(p.Number) && p.FileId != 0 && p.Extension == ".webm").ToList();
             var downloadedMemes = new List<Meme>();
             foreach (var post in posts)
             {
