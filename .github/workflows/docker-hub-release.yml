@@ -5,7 +5,7 @@ on:
     branches: release/*
 
 jobs:
-  buildx:
+  publish:
     runs-on: ubuntu-latest
     steps:
       -
@@ -22,7 +22,7 @@ jobs:
             --build-arg "build=$MEMESTER_BUILD" \
             --output "type=image,push=false" \
             --tag mrosenbjerg/memester:alpine-$MEMESTER_BUILD \
-            ./Docker/Build/AMD64
+            ./Docker/Build/amd64
       -
         name: Push new image
         run: |
