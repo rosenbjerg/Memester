@@ -3,10 +3,10 @@ declare namespace StyleCssNamespace {
     export interface IStyleCss {
         copyButton: string;
         headerControls: string;
-        "meme-li": string;
         memeDiv: string;
         memeFooter: string;
         memeHeader: string;
+        memeLi: string;
         nextButton: string;
         playButton: string;
         threadIdText: string;
