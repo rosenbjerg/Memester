@@ -6,6 +6,7 @@ import * as style from "./style.css";
 import { route } from "preact-router";
 import IconButton from "../../components/iconButton"
 import CopiedText from "../../components/copiedText";
+import { useCallback, useEffect } from "preact/hooks";
 
 interface Props {
     threadId: number;
@@ -41,11 +42,24 @@ export default class MemePage extends Component<Props, State> {
             .then(meme => route(`/${meme.threadId}/${meme.id}`));
     }
 
+    escFunction = useCallback((event) => {
+        if(event.keyCode === 39) {
+            this.nextMeme
+        }
+    },[]);
     //<video src={`/api/memes/${this.props.threadId}/${this.props.memeId}/video`} />
 
     render(_:Props, { meme }: State) {
 
         if (!meme) return <Loading />;
+
+        useEffect(() => {
+            document.addEventListener("keydown", this.escFunction, false);
+
+            return () => {
+                document.removeEventListener("keydown", this.escFunction, false);
+            };
+        }, []);
 
         return (
             <div class={style.wrapper}>
