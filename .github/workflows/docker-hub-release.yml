@@ -1,22 +1,16 @@
 name: Docker build
 
 on:
-  pull_request:
-    branches: release
+  push:
+    branches: release/*
 
 jobs:
-  buildx:
+  publish:
     runs-on: ubuntu-latest
     steps:
       -
         name: Checkout
         uses: actions/checkout@v1
-      -
-        name: Set up Docker Buildx
-        id: buildx
-        uses: crazy-max/ghaction-docker-buildx@v1
-        with:
-          buildx-version: latest
       -
         name: Enable experimental Docker features
         run: |
@@ -26,45 +20,25 @@ jobs:
         run: |
           docker login --username ${{ secrets.DOCKER_USERNAME }} --password ${{ secrets.DOCKER_PASSWORD }}
       -
+        name: Add GitHub environment variables
+        uses: FranzDiebold/github-env-vars-action@v1.2.1
+      -
         name: Build AMD64 image
         run: |
-          Memester_Build__Version=`printf '%(%y.%m.%d)T-alpha' -1` && docker build \
-            --build-arg "build=$Memester_Build__Version" \
+          MEMESTER_BUILD="${GITHUB_REF_NAME/release\//}" && echo $MEMESTER_BUILD && docker build \
+            --build-arg "build=$MEMESTER_BUILD" \
             --output "type=image,push=false" \
-            --tag mrosenbjerg/memester:amd64 \
-            ./docker/gh-build/amd64
+            --tag "mrosenbjerg/memester:$MEMESTER_BUILD-alpine" \
+            ./Docker/Build/amd64
       -
-        name: Build ARM64v8 image
+        name: Push new image
         run: |
-          Memester_Build__Version=`printf '%(%y.%m.%d)T-alpha' -1` && docker build \
-            --build-arg "build=$Memester_Build__Version" \
-            --output "type=image,push=false" \
-            --tag mrosenbjerg/memester:arm64v8 \
-            ./docker/gh-build/arm64v8
+          docker push mrosenbjerg/memester:$MEMESTER_BUILD-alpine
       -
-        name: Build ARM32v7 image
-        run: |
-          Memester_Build__Version=`printf '%(%y.%m.%d)T-alpha' -1` && docker build \
-            --build-arg "build=$Memester_Build__Version" \
-            --output "type=image,push=false" \
-            --tag mrosenbjerg/memester:arm32v7 \
-            ./docker/gh-build/arm32v7
-      -
-        name: Push new images
-        run: |
-          docker push mrosenbjerg/memester:amd64 && \
-          docker push mrosenbjerg/memester:arm64v8 && \
-          docker push mrosenbjerg/memester:arm32v7
-      -
-        name: Create and push Docker manifest
+        name: Create and push new Docker manifest
         env:
           DOCKER_CLI_EXPERIMENTAL: enabled
         run: |
-          docker manifest create mrosenbjerg/memester:latest \
-            mrosenbjerg/memester:amd64 \
-            mrosenbjerg/memester:arm64v8 \
-            mrosenbjerg/memester:arm32v7 && \
-          docker manifest annotate mrosenbjerg/memester:latest mrosenbjerg/nxplx-webapi:amd64 --arch amd64 --os linux && \
-          docker manifest annotate mrosenbjerg/memester:latest mrosenbjerg/nxplx-webapi:arm64v8 --arch arm64 --os linux && \
-          docker manifest annotate mrosenbjerg/memester:latest mrosenbjerg/nxplx-webapi:arm32v7 --arch arm --os linux && \
+          docker manifest create mrosenbjerg/memester:latest mrosenbjerg/memester:$MEMESTER_BUILD-alpine \
+          docker manifest annotate mrosenbjerg/memester:latest mrosenbjerg/memester:$MEMESTER_BUILD-alpine --arch amd64 --os linux && \
           docker manifest push mrosenbjerg/memester:latest
