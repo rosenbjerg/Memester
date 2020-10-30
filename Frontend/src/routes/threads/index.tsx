@@ -3,7 +3,7 @@ import { Thread } from "../../models";
 import Loading from "../../components/loading";
 import ky from "ky";
 import { route } from "preact-router";
-import * as style from "../meme/style.css";
+import * as style from './style.css'
 
 interface State {
     threads?: Thread[];
