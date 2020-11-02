@@ -6,6 +6,7 @@ declare namespace StyleCssNamespace {
         memeDiv: string;
         memeFooter: string;
         memeHeader: string;
+        memeLi: string;
         nextButton: string;
         playButton: string;
         threadIdText: string;
