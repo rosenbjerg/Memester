@@ -1,11 +1,11 @@
 import { Component, h } from "preact";
 import { Meme, MemeIdentification } from "../../models";
-import Loading from "../../components/loading";
+import Loading from "../../components/Loading";
 import ky from "ky";
 import * as style from "./style.css";
 import { route } from "preact-router";
-import IconButton from "../../components/iconButton"
-import CopiedText from "../../components/copiedText";
+import IconButton from "../../components/IconButton"
+import CopiedText from "../../components/CopiedText";
 import { useCallback, useEffect } from "preact/hooks";
 
 interface Props {

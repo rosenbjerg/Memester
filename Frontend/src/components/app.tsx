@@ -2,7 +2,7 @@ import { FunctionalComponent, h } from "preact";
 import { Route, Router } from "preact-router";
 
 import NotFoundPage from "../routes/notfound";
-import Header from "./header";
+import Header from "./Header";
 import MemePage from "../routes/meme";
 import ThreadPage from "../routes/thread";
 import ThreadOverviewPage from "../routes/threads";
