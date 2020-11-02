@@ -1,6 +1,9 @@
 using System;
+using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using FFMpegCore;
 using Hangfire;
 using Hangfire.PostgreSql;
@@ -11,9 +14,12 @@ using Memester.Database;
 using Memester.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders.Physical;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
@@ -81,8 +87,10 @@ namespace Memester
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Memester API"));
             }
             
+            app.UseStaticFiles();
             app.UseRouting();
             app.UseEndpoints(endpoints => endpoints.MapControllers());
+            app.Use(FallbackMiddlewareHandler);
         }
         
         protected void ConfigureHangfire(IGlobalConfiguration hangfireConfiguration)
@@ -108,6 +116,29 @@ namespace Memester
                 .Bind(_configuration.GetSection(typeof(TOptions).Name))
                 .ValidateDataAnnotations();
             services.AddSingleton(typeof(TOptions), provider => provider.GetService<IOptions<TOptions>>().Value);
+        }
+        
+        private static readonly Regex HashRegex = new Regex("\\.[0-9a-f]{5}\\.", RegexOptions.Compiled); 
+        private static readonly FileExtensionContentTypeProvider FileExtensionContentTypeProvider = new FileExtensionContentTypeProvider(); 
+        private static async Task FallbackMiddlewareHandler(HttpContext context, Func<Task> next)
+        {
+            var path = context.Request.Path.ToString().TrimStart('/');
+            var file = Path.Combine("public", path);
+            var fileInfo = File.Exists(file)
+                ? new FileInfo(file)
+                : new FileInfo(Path.Combine("public", "index.html"));
+            if (!context.Response.HasStarted)
+            {
+                if (HashRegex.IsMatch(path))
+                    context.Response.Headers.Add("Cache-Control", "max-age=2592000");
+                
+                if(!FileExtensionContentTypeProvider.TryGetContentType(fileInfo.Name, out var contentType))
+                    contentType = "application/octet-stream";
+                context.Response.ContentType = contentType;
+                context.Response.StatusCode = 200;
+            }
+            await context.Response.SendFileAsync(new PhysicalFileInfo(fileInfo));
+            await context.Response.CompleteAsync();
         }
     }
 }
