@@ -1,6 +1,6 @@
 import { Component, h } from "preact";
 import { FullThread} from "../../models";
-import Loading from "../../components/loading";
+import Loading from "../../components/Loading";
 import ky from "ky";
 import { route } from "preact-router";
 import * as style from "./style.css";
