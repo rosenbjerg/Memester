@@ -26,19 +26,19 @@ jobs:
         name: Build AMD64 image
         run: |
           MEMESTER_BUILD="${GITHUB_REF_NAME/release\//}" && echo $MEMESTER_BUILD && docker build \
-            --build-arg "build=$MEMESTER_BUILD" \
+            --build-arg build="$MEMESTER_BUILD" \
             --output "type=image,push=false" \
-            --tag "mrosenbjerg/memester:$MEMESTER_BUILD-alpine" \
+            --tag mrosenbjerg/memester:"$MEMESTER_BUILD-alpine" \
             ./Docker/Build/amd64
       -
         name: Push new image
         run: |
-          docker push "mrosenbjerg/memester:$MEMESTER_BUILD-alpine"
+          docker push mrosenbjerg/memester:"$MEMESTER_BUILD"-alpine
       -
         name: Create and push new Docker manifest
         env:
           DOCKER_CLI_EXPERIMENTAL: enabled
         run: |
-          docker manifest create mrosenbjerg/memester:latest mrosenbjerg/memester:$MEMESTER_BUILD-alpine \
-          docker manifest annotate mrosenbjerg/memester:latest mrosenbjerg/memester:$MEMESTER_BUILD-alpine --arch amd64 --os linux && \
+          docker manifest create mrosenbjerg/memester:latest mrosenbjerg/memester:"$MEMESTER_BUILD"-alpine \
+          docker manifest annotate mrosenbjerg/memester:latest mrosenbjerg/memester:"$MEMESTER_BUILD"-alpine --arch amd64 --os linux && \
           docker manifest push mrosenbjerg/memester:latest
