@@ -33,7 +33,7 @@ jobs:
       -
         name: Push new image
         run: |
-          docker push mrosenbjerg/memester:$MEMESTER_BUILD-alpine
+          docker push "mrosenbjerg/memester:$MEMESTER_BUILD-alpine"
       -
         name: Create and push new Docker manifest
         env:
