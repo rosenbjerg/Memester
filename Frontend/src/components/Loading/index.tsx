@@ -4,7 +4,7 @@ import * as style from "./style.css";
 const fullscreenStyle = { width: "100%", height: "100%" };
 const normalStyle = { display: "inline-block" };
 
-export default ({ fullscreen }: { fullscreen?: boolean }) => (
+const  Loading = ({ fullscreen }: { fullscreen?: boolean }) => (
     <span style={fullscreen ? fullscreenStyle : normalStyle}>
         <span class={style.loadingContainer}>
             <div class={style["sk-folding-cube"]}>
@@ -18,3 +18,4 @@ export default ({ fullscreen }: { fullscreen?: boolean }) => (
 
 )
 
+export default Loading;
