@@ -10,7 +10,7 @@ COPY --from=gitCloner /project/Memester/Backend/ ./
 RUN dotnet publish Memester.ApplicationHost/Memester.ApplicationHost.csproj -c Release -r linux-musl-x64 -o build
 
 
-FROM node:12-alpine3.10 AS frontendBuilder
+FROM node:12-buster AS frontendBuilder
 WORKDIR /app
 COPY --from=gitCloner /project/Memester/Frontend/ ./
 RUN yarn install --frozen-lockfile --no-progress --silent
