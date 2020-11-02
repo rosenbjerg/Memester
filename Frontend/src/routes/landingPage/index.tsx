@@ -1,5 +1,5 @@
 import { Component, h } from 'preact';
-import {MemeIdentification } from "../../models";
+import {MemeIdentification } from '../../models';
 import ky from 'ky';
 import { route } from 'preact-router';
 import Loading from "../../components/loading";
