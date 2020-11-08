@@ -22,7 +22,7 @@ ARG build
 LABEL maintainer="rosenbjerg, jbaagaard"
 LABEL description="Memester"
 LABEL repository="github.com/rosenbjerg/Memester"
-RUN apk add --update --no-cache ffmpeg
+RUN apk add --update --no-cache ffmpeg imagemagick
 WORKDIR /app
 COPY --from=backendBuilder /app/build ./
 COPY --from=frontendBuilder /app/build ./public/
