@@ -49,7 +49,11 @@ namespace Memester.Services
             var response = await Client.GetAsync(ThreadsUrl.Replace("{BOARD}", board));
             var jsonStream = await response.Content.ReadAsStringAsync();
             var root = JsonSerializer.Deserialize<List<ChanThreadRoot>>(jsonStream);
+#if DEBUG
+            var ids = root.SelectMany(p => p.Threads.Select(t => t.Number)).Skip(1).Take(10).ToArray();
+#else
             var ids = root.SelectMany(p => p.Threads.Select(t => t.Number)).Skip(1).ToArray();
+#endif
             foreach (var threadId in ids)
                 BackgroundJob.Enqueue<ScrapingService>(service => service.IndexThread(board, threadId));
             BackgroundJob.Enqueue<ScrapingService>(service => service.EnforceMaxCapacity());
@@ -109,7 +113,11 @@ namespace Memester.Services
             thread.Memes ??= new List<Meme>();
 
             var existingMemes = await _databaseContext.Memes.Where(m => m.ThreadId == threadId).Select(m => m.Id).ToListAsync();
+#if DEBUG
+            var posts = rootPost.posts.Where(p => !existingMemes.Contains(p.Number) && p.FileId != 0 && p.Extension == ".webm").Take(5).ToList();
+#else
             var posts = rootPost.posts.Where(p => !existingMemes.Contains(p.Number) && p.FileId != 0 && p.Extension == ".webm").ToList();
+#endif
             var downloadedMemes = new List<Meme>();
             foreach (var post in posts)
             {

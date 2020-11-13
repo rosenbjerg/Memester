@@ -13,7 +13,7 @@ export default class LandingPage extends Component<any, any> {
     }
     render(){
         return (
-            <Loading/>
+            <Loading title={"Fetching Meme"}/>
         );
     }
 }

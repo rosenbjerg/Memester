@@ -51,7 +51,7 @@ export default class MemePage extends Component<Props, State> {
 
     render(_:Props, { meme }: State) {
 
-        if (!meme) return <Loading />;
+        if (!meme) return <Loading title={"Fetching Meme"}/>;
 
         useEffect(() => {
             document.addEventListener("keydown", this.escFunction, false);

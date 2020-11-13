@@ -21,7 +21,7 @@ export default class ThreadPage extends Component<Props, State> {
     }
 
     render(props: Props, { thread }: State) {
-        if (thread === undefined) return <Loading />;
+        if (thread === undefined) return <Loading title={"Fetching threads"}/>;
 
         return (
             <div>
