@@ -1,7 +1,7 @@
 .loadingContainer {
-    top: calc(50% - 20px);
+    top: calc(50% - 60px);
     position: absolute;
-    left: calc(50% - 20px);
+    left: calc(50% - 60px);
 }
 
 .sk-folding-cube {

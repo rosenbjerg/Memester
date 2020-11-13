@@ -11,12 +11,10 @@ const Header: FunctionalComponent = () => {
     return (
         <header class={style.header}>
             <h1>MEMESTER</h1>
-            <nav>
-                <Link activeClassName={style.active} href="/login">
-                    login
-                    {/*<Login/>*/}
-                </Link>
-            </nav>
+            <div class={style.rightControles}>
+                <div class={style.loginDiv}>login
+                </div>
+            </div>
         </header>
     );
 };

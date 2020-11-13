@@ -3,6 +3,8 @@ declare namespace StyleCssNamespace {
     export interface IStyleCss {
         active: string;
         header: string;
+        loginDiv: string;
+        rightControles: string;
     }
 }
 
