@@ -1,1 +1,1 @@
-START /d ".\Development" cmd /c "TITLE @docker/memester && docker-compose up --no-recreate"
+START /d ".\Development" cmd /c "TITLE @docker/memester && docker-compose up --no-recreate --remove-orphans"

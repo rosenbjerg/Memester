@@ -13,18 +13,20 @@ using Hangfire;
 using Instances;
 using Memester.Application.Model;
 using Memester.Database;
+using Memester.FileStorage;
 using Memester.Models;
 using Memester.Services.ChanModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace Memester.Services
 {
     public class ScrapingService
     {
         private readonly DatabaseContext _databaseContext;
-        private readonly string _videoFolder;
-        private readonly string _snapshotFolder;
+        private readonly FileStorageService _fileStorageService;
+        private readonly ILogger<ScrapingService> _logger;
         private readonly long _maxCapacityBytes;
         private static readonly HttpClient Client = new HttpClient { DefaultRequestHeaders = {{"User-Agent", "Memester"}}};
         private static readonly Regex HtmlTrimmer = new Regex("<.*?>", RegexOptions.Compiled);
@@ -32,12 +34,12 @@ namespace Memester.Services
         private const string ThreadsUrl = "https://a.4cdn.org/{BOARD}/threads.json";
         private const string ThreadUrl = "https://a.4cdn.org/{BOARD}/thread/{THREAD}.json";
 
-        public ScrapingService(DatabaseContext databaseContext, IConfiguration configuration)
+        public ScrapingService(DatabaseContext databaseContext, FileStorageService fileStorageService , IConfiguration configuration, ILogger<ScrapingService> logger)
         {    
             _databaseContext = databaseContext;
+            _fileStorageService = fileStorageService;
+            _logger = logger;
             var foldersSection = configuration.GetSection("Folders");
-            _videoFolder = Path.GetFullPath(foldersSection["Videos"]);
-            _snapshotFolder = Path.GetFullPath(foldersSection["Snapshots"]);
             _maxCapacityBytes = long.Parse(configuration["MaxCapacityBytes"]);
         }
         
@@ -47,7 +49,11 @@ namespace Memester.Services
             var response = await Client.GetAsync(ThreadsUrl.Replace("{BOARD}", board));
             var jsonStream = await response.Content.ReadAsStringAsync();
             var root = JsonSerializer.Deserialize<List<ChanThreadRoot>>(jsonStream);
+#if DEBUG
+            var ids = root.SelectMany(p => p.Threads.Select(t => t.Number)).Skip(1).Take(10).ToArray();
+#else
             var ids = root.SelectMany(p => p.Threads.Select(t => t.Number)).Skip(1).ToArray();
+#endif
             foreach (var threadId in ids)
                 BackgroundJob.Enqueue<ScrapingService>(service => service.IndexThread(board, threadId));
             BackgroundJob.Enqueue<ScrapingService>(service => service.EnforceMaxCapacity());
@@ -63,16 +69,16 @@ namespace Memester.Services
             foreach (var memeSizePair in memeSizePairs)
             {
                 if (sum < _maxCapacityBytes) break;
-                var webmFile = Path.Combine(_videoFolder, $"thread{memeSizePair.ThreadId}", $"{memeSizePair.Id}.webm");
                 try
                 {
-                    File.Delete(webmFile);
+                    await _fileStorageService.Delete($"meme{memeSizePair.Id}.webm");
+                    await _fileStorageService.Delete($"meme{memeSizePair.Id}.jpeg");
                     sum -= memeSizePair.Size;
                     toDelete.Add(memeSizePair.Id);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
-                    Console.WriteLine($"Could not delete {webmFile}: {e}");
+                    _logger.LogError("Could not delete meme {MemeId}", memeSizePair.Id);
                     toDelete.Remove(memeSizePair.Id);
                 }
             }
@@ -80,6 +86,8 @@ namespace Memester.Services
             var memesToDelete = await _databaseContext.Memes.Where(m => toDelete.Contains(m.Id)).ToListAsync();
             _databaseContext.RemoveRange(memesToDelete);
             await _databaseContext.SaveChangesAsync();
+            _logger.LogInformation("Deleted {DeletedMemes} memes");
+            
         }
         
         [Queue(JobQueues.ThreadIndexing)]
@@ -104,12 +112,12 @@ namespace Memester.Services
 
             thread.Memes ??= new List<Meme>();
 
-            var threadDirectory = Path.Combine(_videoFolder, $"thread{threadId}");
-            var snapshotDirectory = Path.Combine(_snapshotFolder, $"thread{threadId}");
-            Directory.CreateDirectory(threadDirectory);
-            Directory.CreateDirectory(snapshotDirectory);
             var existingMemes = await _databaseContext.Memes.Where(m => m.ThreadId == threadId).Select(m => m.Id).ToListAsync();
+#if DEBUG
+            var posts = rootPost.posts.Where(p => !existingMemes.Contains(p.Number) && p.FileId != 0 && p.Extension == ".webm").Take(5).ToList();
+#else
             var posts = rootPost.posts.Where(p => !existingMemes.Contains(p.Number) && p.FileId != 0 && p.Extension == ".webm").ToList();
+#endif
             var downloadedMemes = new List<Meme>();
             foreach (var post in posts)
             {
@@ -124,7 +132,7 @@ namespace Memester.Services
                     FileName = post.Filename,
                     FileSize = post.FileSize
                 };
-                if (await TryDownloadWebm(threadDirectory, snapshotDirectory, meme.FileId, meme.Id))
+                if (await TryDownloadWebm(meme.FileId, meme.Id))
                     downloadedMemes.Add(meme);
             }
 
@@ -137,7 +145,7 @@ namespace Memester.Services
             
         }
 
-        private async Task<bool> TryDownloadWebm(string videoFolder, string snapshotFolder, long fileId, long memeId)
+        private async Task<bool> TryDownloadWebm(long fileId, long memeId)
         {
             var urlsToTry = new[]
             {
@@ -150,18 +158,34 @@ namespace Memester.Services
                 using var response = await Client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
                 if (!response.IsSuccessStatusCode) continue;
                 
-                var filePath = await DownloadStream(videoFolder, fileId, memeId, response);
+                var tempMemePath = Path.Combine(Path.GetTempPath(), $"{Path.GetTempFileName()}.webm");
+                var snapshotPath = Path.Combine(Path.GetTempPath(), $"{Path.GetTempFileName()}.png");
+                var thumbnailPath = Path.Combine(Path.GetTempPath(), $"{Path.GetTempFileName()}.jpeg");
+                
                 try
                 {
-                    var tempFilePath = await CreateTemporarySnapshotFile(filePath);
-                    var snapshotFilePath = Path.Combine(snapshotFolder, $"{memeId}.jpeg");
-                    await ResizeImage(tempFilePath, 200, 200, snapshotFilePath);
-                    File.Delete(tempFilePath);
+                    await using (var webmInputStream = await response.Content.ReadAsStreamAsync())
+                    await using (var tempFileOutput = File.OpenRead(tempMemePath))
+                    {
+                        await webmInputStream.CopyToAsync(tempFileOutput);
+                    }
+                    
+                    await CreateTemporarySnapshotFile(tempMemePath, snapshotPath);
+                    await ResizeImage(snapshotPath, 200, 200, thumbnailPath);
+                    await using (var file = File.OpenRead(tempMemePath))
+                        await _fileStorageService.Write($"meme{memeId}.webm", file);
+                    await using (var file = File.OpenRead(thumbnailPath))
+                        await _fileStorageService.Write($"meme{memeId}.jpeg", file);
                 }
                 catch (Exception)
                 {
-                    File.Delete(filePath);
                     return false;
+                }
+                finally
+                {
+                    if (File.Exists(tempMemePath)) File.Delete(tempMemePath);
+                    if (File.Exists(snapshotPath)) File.Delete(snapshotPath);
+                    if (File.Exists(thumbnailPath)) File.Delete(thumbnailPath);
                 }
                 
                 return true;
@@ -170,12 +194,10 @@ namespace Memester.Services
             return false;
         }
 
-        private static async Task<string> CreateTemporarySnapshotFile(string filePath)
+        private static async Task CreateTemporarySnapshotFile(string filePath, string snapshotPath)
         {
             var analysis = await FFProbe.AnalyseAsync(filePath);
-            var tempFilePath = Path.Combine(Path.GetTempPath(), $"{Path.GetTempFileName()}.png");
-            await FFMpeg.SnapshotAsync(analysis, tempFilePath);
-            return tempFilePath;
+            await FFMpeg.SnapshotAsync(analysis, snapshotPath, new Size(200, 200), analysis.Duration * 0.2);
         }
 
         private static async Task ResizeImage(string imagePath, int width, int height, string outputPath)
@@ -191,14 +213,11 @@ namespace Memester.Services
             await Instance.FinishAsync("magick", arg);
         }
 
-        private static async Task<string> DownloadStream(string downloadFolder, long fileId, long memeId,
+        private static async Task<Stream> DownloadStream(string downloadFolder, long fileId, long memeId,
             HttpResponseMessage response)
         {
             var filePath = Path.Combine(downloadFolder, $"{memeId}.webm");
-            await using var inputStream = await response.Content.ReadAsStreamAsync();
-            await using var outputStream = File.Create(filePath);
-            await inputStream.CopyToAsync(outputStream);
-            return filePath;
+            return await response.Content.ReadAsStreamAsync();
         }
 
         private async Task<ChanPostRoot?> DownloadThreadPosts(string board, long thread)

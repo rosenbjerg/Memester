@@ -2,9 +2,13 @@
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Memester.Application.Model;
 using Memester.Database;
+using Memester.FileStorage;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -15,28 +19,45 @@ namespace Memester.Controllers
     [Route("api/file")]
     public class FileController : ControllerBase
     {
-        private readonly string _videoFolder;
-        private readonly string _snapshotFolder;
+        private readonly FileStorageService _fileStorageService;
 
-        public FileController(IConfiguration configuration)
+        public FileController(FileStorageService fileStorageService)
         {
-            var foldersSection = configuration.GetSection("Folders");
-            _videoFolder = Path.GetFullPath(foldersSection["Videos"]);
-            _snapshotFolder = Path.GetFullPath(foldersSection["Snapshots"]);
+            _fileStorageService = fileStorageService;
         }
         
-        [HttpGet("{threadId}/{memeId}/webm")]
-        public IActionResult GetWebm([FromRoute, Required]long threadId, [FromRoute, Required]long memeId)
+        [HttpGet("{memeId}/webm")]
+        public async Task<IActionResult> GetWebm([FromRoute, Required]long memeId)
         {
-            var webmFile = Path.Combine(_videoFolder, $"thread{threadId}", $"{memeId}.webm");
-            return PhysicalFile(webmFile, "video/webm", true);
+            var filename = $"meme{memeId}.webm";
+            var requestedRange = Request.GetTypedHeaders().Range?.Ranges.FirstOrDefault();
+            var (stream, length, servedRange) = await _fileStorageService.Read(filename, requestedRange?.From ?? 0, requestedRange?.To);
+            return SendStream(stream, filename, "video/webm", servedRange, length);
+        }
+        [HttpGet("{memeId}/snapshot")]
+        public async Task<IActionResult> GetSnapshot([FromRoute, Required]long memeId)
+        {
+            var filename = $"meme{memeId}.jpeg";
+            var requestedRange = Request.GetTypedHeaders().Range?.Ranges.FirstOrDefault();
+            var (stream, length, servedRange) = await _fileStorageService.Read(filename, requestedRange?.From ?? 0, requestedRange?.To);
+            return SendStream(stream, filename, "image/jpeg", servedRange, length);
         }
 
-        [HttpGet("{threadId}/{memeId}/snapshot")]
-        public IActionResult GetSnapshot([FromRoute, Required]long threadId, [FromRoute, Required]long memeId)
+        private IActionResult SendStream(Stream? stream, string filename, string mime, string? servedRange, long length)
         {
-            var jpegFile = Path.Combine(_snapshotFolder, $"thread{threadId}", $"{memeId}.jpeg");
-            return PhysicalFile(jpegFile, "image/jpeg");
+            if (stream == null)
+            {
+                return NotFound();
+            }
+
+            Response.StatusCode = servedRange != null ? 206 : 200;
+            Response.ContentLength = length;
+            Response.Headers["Accept-Ranges"] = "bytes";
+            Response.Headers["Content-Range"] = servedRange;
+            Response.Headers["Content-Disposition"] = $"filename=\"{WebUtility.UrlEncode(filename)}\"";
+
+            return File(stream, mime, true);
         }
+
     }
 }
