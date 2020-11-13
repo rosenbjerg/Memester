@@ -22,6 +22,8 @@ namespace Memester.FileStorage
             _s3client = new AmazonS3Client(new BasicAWSCredentials(fileStorageOptions.AccessKey, fileStorageOptions.SecretKey), new AmazonS3Config
             {
                 ServiceURL = fileStorageOptions.Endpoint,
+                SignatureMethod = SigningAlgorithm.HmacSHA256,
+                ForcePathStyle = true,
                 MaxConnectionsPerServer = 100
             });
         }

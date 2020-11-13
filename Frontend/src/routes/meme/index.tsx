@@ -43,8 +43,15 @@ export default class MemePage extends Component<Props, State> {
     }
 
     escFunction = useCallback((event) => {
-        if(event.keyCode === 39) {
-            this.nextMeme
+        console.log(event.key)
+        if(event.key === "ArrowRight") {
+            this.nextMeme();
+        }
+        else if(event.key === "ArrowLeft" && document.referrer != ""){
+            window.history.back();
+        }
+        else if(event.key === "c"){
+            navigator.clipboard.writeText(window.location.href);
         }
     },[]);
     //<video src={`/api/memes/${this.props.threadId}/${this.props.memeId}/video`} />
@@ -55,7 +62,6 @@ export default class MemePage extends Component<Props, State> {
 
         useEffect(() => {
             document.addEventListener("keydown", this.escFunction, false);
-
             return () => {
                 document.removeEventListener("keydown", this.escFunction, false);
             };
@@ -90,17 +96,23 @@ export default class MemePage extends Component<Props, State> {
                         </video>
                     </div>
                     <div className={`${style.memeFooter}`}>
-                        <button class={`${style.copyButton}`} onClick={function(){
-                            navigator.clipboard.writeText(window.location.href);
-                            setTimeout(function(){
+                        <div className={`${style.memeFooterControls}`}>
+                            <div className={`${style.likeDiv}`}><IconButton icon={"thumb_down"} onClick={this.nextMeme}
+                                                                            style={'color: rgba(0,0,0,0); font-size: 32px'} />
+                            </div>
+                            <button className={`${style.copyButton}`} onClick={function() {
+                                navigator.clipboard.writeText(window.location.href);
+                                setTimeout(function() {
 
-                            },300)
-                            return(<CopiedText/>)
-                        }}>COPY LINK!
-                        </button>
-
+                                }, 300)
+                                return (<CopiedText />)
+                            }}>COPY LINK!
+                            </button>
+                            <div className={`${style.likeDiv}`}><IconButton icon={"thumb_up"} onClick={this.nextMeme}
+                                                                            style={'color: rgba(0,0,0,0); font-size: 32px'} />
+                            </div>
+                        </div>
                     </div>
-
                 </div>
             </div>
         );
