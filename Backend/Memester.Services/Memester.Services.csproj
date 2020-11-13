@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="FFMpegCore" Version="2.2.6" />
+      <PackageReference Include="FFMpegCore" Version="3.1.0" />
       <PackageReference Include="Instances" Version="1.6.0" />
       <PackageReference Include="MailKit" Version="2.9.0" />
       <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
@@ -18,6 +18,7 @@
       <ProjectReference Include="..\Memester.Application.Models\Memester.Application.Models.csproj" />
       <ProjectReference Include="..\Memester.Core\Memester.Core.csproj" />
       <ProjectReference Include="..\Memester.Database\Memester.Database.csproj" />
+      <ProjectReference Include="..\Memester.FileStorage\Memester.FileStorage.csproj" />
     </ItemGroup>
 
 </Project>

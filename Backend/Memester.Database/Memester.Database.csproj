@@ -11,6 +11,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Memester.Core\Memester.Core.csproj" />
       <ProjectReference Include="..\Memester.Models\Memester.Models.csproj" />
     </ItemGroup>
 

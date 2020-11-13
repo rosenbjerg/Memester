@@ -11,6 +11,7 @@ using Memester.Application.Model;
 using Memester.Core;
 using Memester.Core.Options;
 using Memester.Database;
+using Memester.FileStorage;
 using Memester.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -41,6 +42,7 @@ namespace Memester
         {
             AddOptions<EmailOptions>(services);
             AddOptions<SessionOptions>(services);
+            AddOptions<FileStorageOptions>(services);
             
             FFMpegOptions.Configure(new FFMpegOptions
             {
@@ -71,14 +73,20 @@ namespace Memester
             services.AddSingleton(typeof(IEmailService), typeof(MailkitEmailService));
             services.AddSingleton(typeof(SessionService));
             services.AddSingleton(typeof(Random));
+
+            services.AddTransient<IAsyncInitialized, FileStorageService>();
+            services.AddTransient<IAsyncInitialized, DatabaseContext>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DatabaseContext databaseContext)
         {
-            //databaseContext.Database.EnsureDeleted();
-            databaseContext.Database.EnsureCreated();
-            
+            var initializers = app.ApplicationServices.GetServices<IAsyncInitialized>();
+            foreach (var initializer in initializers)
+            {
+                initializer.Initialize().GetAwaiter().GetResult();
+            }
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

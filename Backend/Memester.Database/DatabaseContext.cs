@@ -1,9 +1,11 @@
-﻿using Memester.Models;
+﻿using System.Threading.Tasks;
+using Memester.Core;
+using Memester.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Memester.Database
 {
-    public class DatabaseContext : DbContext
+    public class DatabaseContext : DbContext, IAsyncInitialized
     {
         public DatabaseContext() { }
         public DatabaseContext(DbContextOptions<DatabaseContext> options)
@@ -11,6 +13,7 @@ namespace Memester.Database
 
         public DbSet<User> Users { get; set; }
         public DbSet<LoginToken> LoginTokens { get; set; }
+        public DbSet<Like> Likes { get; set; }
         public DbSet<Meme> Memes { get; set; }
         public DbSet<Thread> Threads { get; set; }
         public DbSet<Vote> Votes { get; set; }
@@ -34,6 +37,11 @@ namespace Memester.Database
             modelBuilder.Entity<LoginToken>().HasKey(fm => fm.Key);
             modelBuilder.Entity<FavoritedMeme>().HasKey(fm => new {fm.UserId, fm.MemeId});
             modelBuilder.Entity<Vote>().HasKey(fm => new {fm.UserId, fm.MemeId});
+        }
+
+        public async Task Initialize()
+        {
+            await Database.EnsureCreatedAsync();
         }
     }
 }

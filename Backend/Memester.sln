@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Memester.Application.Models
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Memester.Core", "Memester.Core\Memester.Core.csproj", "{F05ED1F0-2818-487F-82F9-9A0E6EA9B09A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Memester.FileStorage", "Memester.FileStorage\Memester.FileStorage.csproj", "{FE85925C-7F99-4791-BB0E-96759BD618C7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,5 +44,9 @@ Global
 		{F05ED1F0-2818-487F-82F9-9A0E6EA9B09A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F05ED1F0-2818-487F-82F9-9A0E6EA9B09A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F05ED1F0-2818-487F-82F9-9A0E6EA9B09A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE85925C-7F99-4791-BB0E-96759BD618C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE85925C-7F99-4791-BB0E-96759BD618C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE85925C-7F99-4791-BB0E-96759BD618C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE85925C-7F99-4791-BB0E-96759BD618C7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

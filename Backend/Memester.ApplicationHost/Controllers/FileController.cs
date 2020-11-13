@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Memester.Application.Model;
 using Memester.Database;
+using Memester.FileStorage;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -15,11 +16,13 @@ namespace Memester.Controllers
     [Route("api/file")]
     public class FileController : ControllerBase
     {
+        private readonly FileStorageService _fileStorageService;
         private readonly string _videoFolder;
         private readonly string _snapshotFolder;
 
-        public FileController(IConfiguration configuration)
+        public FileController(IConfiguration configuration, FileStorageService fileStorageService)
         {
+            _fileStorageService = fileStorageService;
             var foldersSection = configuration.GetSection("Folders");
             _videoFolder = Path.GetFullPath(foldersSection["Videos"]);
             _snapshotFolder = Path.GetFullPath(foldersSection["Snapshots"]);
@@ -29,6 +32,7 @@ namespace Memester.Controllers
         public IActionResult GetWebm([FromRoute, Required]long threadId, [FromRoute, Required]long memeId)
         {
             var webmFile = Path.Combine(_videoFolder, $"thread{threadId}", $"{memeId}.webm");
+            var range = 
             return PhysicalFile(webmFile, "video/webm", true);
         }
 
