@@ -19,13 +19,11 @@ const App: FunctionalComponent = () => {
         <div id="app">
             <Header />
             <Router>
-
                 <Route path="/" component={LandingPage} />
                 <Route path="/overview" component={ThreadOverviewPage} />
                 <Route path="/:threadId" component={ThreadPage} />
                 <Route path="/:threadId/:memeId" component={MemePage} />
                 <NotFoundPage default />
-                
             </Router>
         </div>
     );
