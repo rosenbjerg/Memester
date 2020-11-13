@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 using Amazon.Runtime;
 using Amazon.S3;
@@ -25,16 +26,21 @@ namespace Memester.FileStorage
             });
         }
 
-        public async Task<(Stream ResponseStream, string ContentRange)> Read(Guid id, long from = 0, long? to = null)
+        public async Task<(Stream? ResponseStream, long ContentLength, string? ContentRange)> Read(string id, long from = 0, long? to = null)
         {
             var request = new GetObjectRequest
             {
                 BucketName = _bucket,
-                Key = $"{GeneratePrefix(id.ToString())}/{id.ToString()}"
+                Key = $"{GeneratePrefix(id)}/{id}"
             };
 
             var response = await _s3client.GetObjectAsync(request);
-            return (response.ResponseStream, response.ContentRange);
+            if (!IsSuccessStatus(response.HttpStatusCode))
+            {
+                return (null, default, default);
+            }
+            
+            return (response.ResponseStream, response.ContentLength, response.ContentRange);
         }
 
         public async Task Write(string id, Stream stream)
@@ -68,6 +74,12 @@ namespace Memester.FileStorage
             }
         }
 
+        private bool IsSuccessStatus(HttpStatusCode httpStatusCode)
+        {
+            var httpCodeValue = (int)httpStatusCode;
+            return httpCodeValue >= 200 && httpCodeValue <= 299;
+        }
+        
         private static string GeneratePrefix(string id) => (GetStableHashCode(id) % 999).ToString();
 
         private static int GetStableHashCode(string str)
