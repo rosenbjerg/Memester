@@ -22,6 +22,5 @@ export default function IconButton(props:Props){
             className={`${style.buttonStyle} material-icons ${props.class || ""}`}
             style={`${props.style||''}`}
             onClick={handleClick}>{props.icon}</button>
-
     )
 }
