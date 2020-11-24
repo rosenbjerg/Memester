@@ -62,21 +62,21 @@ namespace Memester
             
             services.AddMvc().AddJsonOptions(options => ConfigureJsonSerializer(options.JsonSerializerOptions));
             
-            services.AddDbContext<DatabaseContext>(options => options.UseNpgsql(_configuration.GetConnectionString("Pgsql")));
+            services.AddDbContext<DatabaseContext>(options => options.UseNpgsql(_configuration.GetConnectionString("Pgsql"), b => b.MigrationsAssembly(typeof(DatabaseContext).Assembly.FullName)));
             
             services.AddScoped(typeof(OperationContext), _ => new OperationContext());
             services.AddScoped(typeof(IHttpSessionService), typeof(CookieSessionService));
             services.AddScoped(typeof(ScrapingService));
             services.AddScoped(typeof(IndexingService));
-            services.AddScoped(typeof(AuthenticationService));
             services.AddScoped(typeof(FileStorageService));
+            services.AddScoped(typeof(AuthenticationService));
             
             services.AddSingleton(typeof(IEmailService), typeof(MailkitEmailService));
             services.AddSingleton(typeof(SessionService));
             services.AddSingleton(typeof(Random));
 
             services.AddTransient<IAsyncInitialized, FileStorageService>();
-            services.AddTransient<IAsyncInitialized, DatabaseContext>();
+            // services.AddTransient<IAsyncInitialized, DatabaseContext>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -87,6 +87,8 @@ namespace Memester
             {
                 initializer.Initialize().GetAwaiter().GetResult();
             }
+
+            databaseContext.Database.EnsureCreated();
 
             if (env.IsDevelopment())
             {

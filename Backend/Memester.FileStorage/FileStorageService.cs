@@ -13,13 +13,13 @@ namespace Memester.FileStorage
 {
     public class FileStorageService : IAsyncInitialized
     {
-        private readonly AmazonS3Client _s3client;
+        private readonly AmazonS3Client _s3Client;
         private readonly string _bucket;
 
         public FileStorageService(FileStorageOptions fileStorageOptions)
         {
             _bucket = fileStorageOptions.Bucket;
-            _s3client = new AmazonS3Client(new BasicAWSCredentials(fileStorageOptions.AccessKey, fileStorageOptions.SecretKey), new AmazonS3Config
+            _s3Client = new AmazonS3Client(new BasicAWSCredentials(fileStorageOptions.AccessKey, fileStorageOptions.SecretKey), new AmazonS3Config
             {
                 ServiceURL = fileStorageOptions.Endpoint,
                 SignatureMethod = SigningAlgorithm.HmacSHA256,
@@ -28,7 +28,7 @@ namespace Memester.FileStorage
             });
         }
 
-        public async Task<(Stream? ResponseStream, long ContentLength, string? ContentRange)> Read(string id, long from = 0, long? to = null)
+        public async Task<(Stream ResponseStream, long ContentLength)> Read(string id, long from = 0, long? to = null)
         {
             var request = new GetObjectRequest
             {
@@ -36,13 +36,13 @@ namespace Memester.FileStorage
                 Key = $"{GeneratePrefix(id)}/{id}"
             };
 
-            var response = await _s3client.GetObjectAsync(request);
+            var response = await _s3Client.GetObjectAsync(request);
             if (!IsSuccessStatus(response.HttpStatusCode))
             {
-                return (null, default, default);
+                throw new Exception();
             }
             
-            return (response.ResponseStream, response.ContentLength, response.ContentRange);
+            return (response.ResponseStream, response.ContentLength);
         }
 
         public async Task Write(string id, Stream stream)
@@ -54,7 +54,7 @@ namespace Memester.FileStorage
                 InputStream = stream
             };
 
-            await _s3client.PutObjectAsync(request);
+            await _s3Client.PutObjectAsync(request);
         }
 
         public async Task Delete(string id)
@@ -65,14 +65,14 @@ namespace Memester.FileStorage
                 Key = $"{GeneratePrefix(id)}/{id}"
             };
 
-            await _s3client.DeleteObjectAsync(request);
+            await _s3Client.DeleteObjectAsync(request);
         }
 
         public async Task Initialize()
         {
-            if (!await AmazonS3Util.DoesS3BucketExistV2Async(_s3client, _bucket))
+            if (!await AmazonS3Util.DoesS3BucketExistV2Async(_s3Client, _bucket))
             {
-                await _s3client.PutBucketAsync(_bucket);
+                await _s3Client.PutBucketAsync(_bucket);
             }
         }
 

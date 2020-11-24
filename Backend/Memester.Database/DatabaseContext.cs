@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Memester.Database
 {
-    public class DatabaseContext : DbContext, IAsyncInitialized
+    public class DatabaseContext : DbContext
     {
         public DatabaseContext(DbContextOptions<DatabaseContext> options)
             : base(options) { }
@@ -38,11 +38,6 @@ namespace Memester.Database
             modelBuilder.Entity<LoginToken>().HasKey(fm => fm.Key);
             modelBuilder.Entity<FavoritedMeme>().HasKey(fm => new {fm.UserId, fm.MemeId});
             modelBuilder.Entity<Vote>().HasKey(fm => new {fm.UserId, fm.MemeId});
-        }
-
-        public async Task Initialize()
-        {
-            await Database.EnsureCreatedAsync();
         }
     }
 }

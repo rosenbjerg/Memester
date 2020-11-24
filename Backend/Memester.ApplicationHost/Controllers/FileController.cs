@@ -1,17 +1,7 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Text.Encodings.Web;
-using System.Threading.Tasks;
-using Memester.Application.Model;
-using Memester.Database;
+﻿using System.ComponentModel.DataAnnotations;
+using AspNetCore.Mvc.RangedStream;
 using Memester.FileStorage;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 
 namespace Memester.Controllers
 {
@@ -27,36 +17,16 @@ namespace Memester.Controllers
         }
         
         [HttpGet("{memeId}/webm")]
-        public async Task<IActionResult> GetWebm([FromRoute, Required]long memeId)
+        public RangedStreamResult GetWebm([FromRoute, Required]long memeId)
         {
             var filename = $"meme{memeId}.webm";
-            var requestedRange = Request.GetTypedHeaders().Range?.Ranges.FirstOrDefault();
-            var (stream, length, servedRange) = await _fileStorageService.Read(filename, requestedRange?.From ?? 0, requestedRange?.To);
-            return SendStream(stream, filename, "video/webm", servedRange, length);
+            return new RangedStreamResult((from, to) => _fileStorageService.Read(filename, from, to), filename, "video/webm");
         }
         [HttpGet("{memeId}/snapshot")]
-        public async Task<IActionResult> GetSnapshot([FromRoute, Required]long memeId)
+        public RangedStreamResult GetSnapshot([FromRoute, Required]long memeId)
         {
             var filename = $"meme{memeId}.jpeg";
-            var requestedRange = Request.GetTypedHeaders().Range?.Ranges.FirstOrDefault();
-            var (stream, length, servedRange) = await _fileStorageService.Read(filename, requestedRange?.From ?? 0, requestedRange?.To);
-            return SendStream(stream, filename, "image/jpeg", servedRange, length);
-        }
-
-        private IActionResult SendStream(Stream? stream, string filename, string mime, string? servedRange, long length)
-        {
-            if (stream == null)
-            {
-                return NotFound();
-            }
-
-            Response.StatusCode = servedRange != null ? 206 : 200;
-            Response.ContentLength = length;
-            Response.Headers["Accept-Ranges"] = "bytes";
-            Response.Headers["Content-Range"] = servedRange;
-            Response.Headers["Content-Disposition"] = $"filename=\"{WebUtility.UrlEncode(filename)}\"";
-
-            return File(stream, mime, true);
+            return new RangedStreamResult((from, to) => _fileStorageService.Read(filename, from, to), filename, "image/jpeg");
         }
 
     }

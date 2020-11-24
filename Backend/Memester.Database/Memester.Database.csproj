@@ -5,9 +5,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Hangfire.PostgreSql" Version="1.7.1" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.8" />
-      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="3.1.4" />
+      <PackageReference Include="Hangfire.PostgreSql" Version="1.8.0" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.0" />
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.0" />
     </ItemGroup>
 
     <ItemGroup>
