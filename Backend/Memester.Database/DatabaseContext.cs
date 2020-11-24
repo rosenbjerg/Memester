@@ -7,7 +7,6 @@ namespace Memester.Database
 {
     public class DatabaseContext : DbContext, IAsyncInitialized
     {
-        public DatabaseContext() { }
         public DatabaseContext(DbContextOptions<DatabaseContext> options)
             : base(options) { }
 

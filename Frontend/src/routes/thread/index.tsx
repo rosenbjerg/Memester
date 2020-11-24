@@ -4,6 +4,7 @@ import Loading from "../../components/Loading";
 import ky from "ky";
 import { route } from "preact-router";
 import * as style from "./style.css";
+import * as S from "./thread.styled";
 
 interface Props {
     threadId: number;
@@ -24,19 +25,19 @@ export default class ThreadPage extends Component<Props, State> {
         if (thread === undefined) return <Loading title={"Fetching threads"}/>;
 
         return (
-            <div>
-                <h2>{thread.name}</h2>
-                <ul>
+            <S.Wrapper>
+                <S.Title>{thread.name}</S.Title>
+                <S.MemeList>
                     {thread.memes.map(m => (
                         <li style={`background-image: url("/api/file/${props.threadId}/${m.id}/snapshot")`} className={`${style.name} truncate`} key={m.id} onClick={() => route(`/${this.props.threadId}/${m.id}`)} >
-                        <div className={`${style.memeoverlay}`}>
+                        <S.MemeOverlay>
                             <div style={"background-color: rgba(0,0,0,0.5)"}>{m.name}</div>
 
-                        </div>
+                        </S.MemeOverlay>
                         </li>
                     ))}
-                </ul>
-            </div>
+                </S.MemeList>
+            </S.Wrapper>
         );
     }
 }

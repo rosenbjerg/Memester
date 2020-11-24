@@ -69,6 +69,7 @@ namespace Memester
             services.AddScoped(typeof(ScrapingService));
             services.AddScoped(typeof(IndexingService));
             services.AddScoped(typeof(AuthenticationService));
+            services.AddScoped(typeof(FileStorageService));
             
             services.AddSingleton(typeof(IEmailService), typeof(MailkitEmailService));
             services.AddSingleton(typeof(SessionService));
