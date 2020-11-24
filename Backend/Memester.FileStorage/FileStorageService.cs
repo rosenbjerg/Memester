@@ -28,18 +28,19 @@ namespace Memester.FileStorage
             });
         }
 
-        public async Task<(Stream ResponseStream, long ContentLength)> Read(string id, long from = 0, long? to = null)
+        public async Task<(Stream? ResponseStream, long ContentLength)> Read(string id, long from = 0, long? to = null)
         {
             var request = new GetObjectRequest
             {
                 BucketName = _bucket,
-                Key = $"{GeneratePrefix(id)}/{id}"
+                Key = $"{GeneratePrefix(id)}/{id}",
+                ByteRange = new ByteRange($"bytes={from}-{to}")
             };
 
             var response = await _s3Client.GetObjectAsync(request);
             if (!IsSuccessStatus(response.HttpStatusCode))
             {
-                throw new Exception();
+                return (null, 0);
             }
             
             return (response.ResponseStream, response.ContentLength);
@@ -84,12 +85,12 @@ namespace Memester.FileStorage
         
         private static string GeneratePrefix(string id) => (GetStableHashCode(id) % 999).ToString();
 
-        private static int GetStableHashCode(string str)
+        private static uint GetStableHashCode(string str)
         {
             unchecked
             {
-                int hash1 = 5381;
-                int hash2 = hash1;
+                uint hash1 = 5381;
+                uint hash2 = hash1;
 
                 for(int i = 0; i < str.Length && str[i] != '\0'; i += 2)
                 {

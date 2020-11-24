@@ -165,7 +165,7 @@ namespace Memester.Services
                 try
                 {
                     await using (var webmInputStream = await response.Content.ReadAsStreamAsync())
-                    await using (var tempFileOutput = File.OpenRead(tempMemePath))
+                    await using (var tempFileOutput = File.Create(tempMemePath))
                     {
                         await webmInputStream.CopyToAsync(tempFileOutput);
                     }

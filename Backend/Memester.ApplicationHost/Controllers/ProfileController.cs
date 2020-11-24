@@ -25,6 +25,7 @@ namespace Memester.Controllers
             _databaseContext = databaseContext;
         }
 
+        [HttpPost("vote")]
         public async Task Vote([FromRoute, Required]long memeId)
         {
             var meme = await _databaseContext.Memes.SingleAsync(m => m.Id == memeId);

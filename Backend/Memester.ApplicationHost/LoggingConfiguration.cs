@@ -40,7 +40,7 @@ namespace Memester
                             restrictedToMinimumLevel: logSettings.LogLevel,
                             rollingInterval: RollingInterval.Day,
                             fileSizeLimitBytes: 50000000,
-                            retainedFileCountLimit: 90);
+                            retainedFileCountLimit: 180);
                     });
             };
         }
