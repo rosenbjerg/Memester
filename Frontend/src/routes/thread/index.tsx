@@ -26,10 +26,10 @@ export default class ThreadPage extends Component<Props, State> {
 
         return (
             <S.Wrapper>
-                <S.Title>{thread.name}</S.Title>
+                <S.Title><div class={"truncate"}>{thread.name}</div></S.Title>
                 <S.MemeList>
                     {thread.memes.map(m => (
-                        <li style={`background-image: url("/api/file/${props.threadId}/${m.id}/snapshot")`} className={`${style.name} truncate`} key={m.id} onClick={() => route(`/${this.props.threadId}/${m.id}`)} >
+                        <li style={`background-image: url("/api/file/${m.id}/snapshot")`} className={`${style.name} truncate`} key={m.id} onClick={() => route(`/${this.props.threadId}/${m.id}`)} >
                         <S.MemeOverlay>
                             <div style={"background-color: rgba(0,0,0,0.5)"}>{m.name}</div>
 

@@ -13,11 +13,14 @@ export const MemeList = styled("ul")`
 `
 
 export const Meme = styled("li")`
-
+    
 `
 
 export const MemeOverlay = styled("div")`
     height: 100%;
     width: 100%;
 
+    &:hover{
+        background-color: rgba(0,0,0,0.2);
+    }
 `

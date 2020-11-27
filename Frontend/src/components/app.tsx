@@ -1,4 +1,4 @@
-import { FunctionalComponent, h } from "preact";
+import { createContext, FunctionalComponent, h } from "preact";
 import { Route, Router } from "preact-router";
 
 import NotFoundPage from "../routes/notfound";
@@ -14,18 +14,24 @@ if ((module as any).hot) {
     require("preact/debug");
 }
 
+
+const UserContext = createContext('undefined')
+
 const App: FunctionalComponent = () => {
     return (
-        <div id="app">
-            <Header />
-            <Router>
-                <Route path="/" component={LandingPage} />
-                <Route path="/overview" component={ThreadOverviewPage} />
-                <Route path="/:threadId" component={ThreadPage} />
-                <Route path="/:threadId/:memeId" component={MemePage} />
-                <NotFoundPage default />
-            </Router>
-        </div>
+        <UserContext.Provider value='undefined'>
+            <div id="app">
+                <Header />
+                <Router>
+                    <Route path="/" component={LandingPage} />
+                    <Route path="/overview" component={ThreadOverviewPage} />
+                    <Route path="/:threadId" component={ThreadPage} />
+                    <Route path="/:threadId/:memeId" component={MemePage} />
+                    <NotFoundPage default />
+                </Router>
+            </div>
+
+        </UserContext.Provider>
     );
 };
 

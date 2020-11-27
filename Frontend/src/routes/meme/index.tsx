@@ -89,7 +89,7 @@ export default class MemePage extends Component<Props, State> {
                             }}
                         >
                             <source
-                                src={`/api/file/${meme.threadId}/${meme.id}/webm`}
+                                src={`/api/file/${meme.id}/webm`}
                                 type={"video/webm"}
                             />
                             {/*<source src={`/api/memes/${this.props.threadId}/${this.props.memeId}/video`} type={"video/webm"}/>*/}
@@ -97,9 +97,9 @@ export default class MemePage extends Component<Props, State> {
                     </div>
                     <div className={`${style.memeFooter}`}>
                         <div className={`${style.memeFooterControls}`}>
-                            <div className={`${style.likeDiv}`}><IconButton icon={"thumb_down"} onClick={this.nextMeme}
-                                                                            style={'color: rgba(0,0,0,0); font-size: 32px'} />
-                            </div>
+                            {/*<div className={`${style.likeDiv}`}><IconButton icon={"thumb_down"} onClick={this.nextMeme}*/}
+                            {/*                                                style={'color: rgba(0,0,0,0); font-size: 32px'} />*/}
+                            {/*</div>*/}
                             <button className={`${style.copyButton}`} onClick={function() {
                                 navigator.clipboard.writeText(window.location.href);
                                 setTimeout(function() {
@@ -108,9 +108,9 @@ export default class MemePage extends Component<Props, State> {
                                 return (<CopiedText />)
                             }}>COPY LINK!
                             </button>
-                            <div className={`${style.likeDiv}`}><IconButton icon={"thumb_up"} onClick={this.nextMeme}
-                                                                            style={'color: rgba(0,0,0,0); font-size: 32px'} />
-                            </div>
+                            {/*<div className={`${style.likeDiv}`}><IconButton icon={"thumb_up"} onClick={this.nextMeme}*/}
+                            {/*                                                style={'color: rgba(0,0,0,0); font-size: 32px'} />*/}
+                            {/*</div>*/}
                         </div>
                     </div>
                 </div>

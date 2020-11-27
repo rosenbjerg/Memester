@@ -12,8 +12,8 @@ const Header: FunctionalComponent = () => {
         <header class={style.header}>
             <h1>MEMESTER</h1>
             <div class={style.rightControles}>
-                <div class={style.loginDiv}>login
-                </div>
+                {/*<div class={style.loginDiv}>login*/}
+                {/*</div>*/}
             </div>
         </header>
     );
