@@ -42,8 +42,20 @@ namespace Memester.FileStorage
             {
                 return (null, 0);
             }
-            
-            return (response.ResponseStream, response.ContentLength);
+
+            var fullLength = await GetLengthAsync(id);
+            return (response.ResponseStream, fullLength);
+        }
+
+        public async Task<long> GetLengthAsync(string id)
+        {
+            var request = new GetObjectMetadataRequest
+            {
+                BucketName = _bucket,
+                Key = $"{GeneratePrefix(id)}/{id}"
+            };
+            var response = await _s3Client.GetObjectMetadataAsync(request);
+            return response.ContentLength;
         }
 
         public async Task Write(string id, Stream stream)
