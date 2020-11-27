@@ -89,6 +89,7 @@ namespace Memester
             }
 
             databaseContext.Database.EnsureCreated();
+            
 
             if (env.IsDevelopment())
             {
@@ -96,6 +97,10 @@ namespace Memester
                 app.UseHangfireDashboard("/dashboard");
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Memester API"));
+            }
+            else
+            {
+                RecurringJob.AddOrUpdate<ScrapingService>(service => service.IndexBoard("wsg"), "*/30 * * * *");
             }
             
             app.UseStaticFiles();
@@ -126,7 +131,7 @@ namespace Memester
             services.AddOptions<TOptions>()
                 .Bind(_configuration.GetSection(typeof(TOptions).Name))
                 .ValidateDataAnnotations();
-            services.AddSingleton(typeof(TOptions), provider => provider.GetService<IOptions<TOptions>>().Value);
+            services.AddSingleton(typeof(TOptions), provider => provider.GetRequiredService<IOptions<TOptions>>().Value);
         }
         
         private static readonly Regex HashRegex = new Regex("\\.[0-9a-f]{5}\\.", RegexOptions.Compiled); 
