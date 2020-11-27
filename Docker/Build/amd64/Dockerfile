@@ -4,7 +4,7 @@ WORKDIR /project
 RUN git clone https://github.com/rosenbjerg/Memester.git
 
 
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1-alpine AS backendBuilder
+FROM mcr.microsoft.com/dotnet/re/sdk:5.0-alpine AS backendBuilder
 WORKDIR /app
 COPY --from=gitCloner /project/Memester/Backend/ ./
 RUN dotnet publish Memester.ApplicationHost/Memester.ApplicationHost.csproj -c Release -r linux-musl-x64 -o build
@@ -17,7 +17,7 @@ RUN yarn install --frozen-lockfile --no-progress --silent
 RUN yarn build
 
 
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-alpine AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:5.0-alpine AS runtime
 ARG build
 LABEL maintainer="rosenbjerg, jbaagaard"
 LABEL description="Memester"
