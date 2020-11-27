@@ -1,18 +1,12 @@
-﻿FROM alpine AS gitCloner
-RUN apk --update --no-cache --quiet add git openssh
-WORKDIR /project
-RUN git clone https://github.com/rosenbjerg/Memester.git
-
-
-FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS backendBuilder
+﻿FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS backendBuilder
 WORKDIR /app
-COPY --from=gitCloner /project/Memester/Backend/ ./
+COPY ../../../Backend/ ./
 RUN dotnet publish Memester.ApplicationHost/Memester.ApplicationHost.csproj -c Release -r linux-musl-x64 -o build
 
 
 FROM node:12-alpine AS frontendBuilder
 WORKDIR /app
-COPY --from=gitCloner /project/Memester/Frontend/ ./
+COPY ../../../Frontend/ ./
 RUN yarn install --frozen-lockfile --no-progress --silent
 RUN yarn build
 
