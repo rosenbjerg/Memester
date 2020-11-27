@@ -86,7 +86,7 @@ namespace Memester.Services
             var memesToDelete = await _databaseContext.Memes.Where(m => toDelete.Contains(m.Id)).ToListAsync();
             _databaseContext.RemoveRange(memesToDelete);
             await _databaseContext.SaveChangesAsync();
-            _logger.LogInformation("Deleted {DeletedMemes} memes");
+            _logger.LogInformation("Deleted {DeletedMemes} memes", memesToDelete.Count);
             
         }
         

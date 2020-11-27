@@ -1,1 +1,1 @@
-START /d ".\Development" cmd /c "TITLE @docker/memester && docker-compose down"
+START /d ".\Development" cmd /c "TITLE @docker/memester && docker-compose down && docker-compose up"

@@ -28,6 +28,5 @@ namespace Memester.Controllers
             var filename = $"meme{memeId}.jpeg";
             return new RangedStreamResult((from, to) => _fileStorageService.Read(filename, from, to), filename, "image/jpeg");
         }
-
     }
 }
