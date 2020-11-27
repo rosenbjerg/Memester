@@ -1,12 +1,12 @@
 ﻿FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS backendBuilder
 WORKDIR /app
-COPY ../../../Backend/ ./
+COPY ./Backend/ ./
 RUN dotnet publish Memester.ApplicationHost/Memester.ApplicationHost.csproj -c Release -r linux-musl-x64 -o build
 
 
 FROM node:12-alpine AS frontendBuilder
 WORKDIR /app
-COPY ../../../Frontend/ ./
+COPY ./Frontend/ ./
 RUN yarn install --frozen-lockfile --no-progress --silent
 RUN yarn build
 
