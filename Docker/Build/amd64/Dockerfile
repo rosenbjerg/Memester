@@ -23,4 +23,4 @@ COPY --from=frontendBuilder /app/build ./public/
 ENV MEMESTER_BUILD__VERSION=$build
 ENV ASPNETCORE_URLS="http://*:5000"
 EXPOSE 5000
-ENTRYPOINT ["Memester.ApplicationHost"]
+ENTRYPOINT ["./Memester.ApplicationHost"]
