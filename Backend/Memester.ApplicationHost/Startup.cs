@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using FFMpegCore;
 using Hangfire;
 using Hangfire.PostgreSql;
+using HangfireBasicAuthenticationFilter;
 using Memester.Application.Model;
 using Memester.Core;
 using Memester.Core.Options;
@@ -22,6 +23,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders.Physical;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using SessionOptions = Memester.Core.Options.SessionOptions;
@@ -80,21 +82,26 @@ namespace Memester
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DatabaseContext databaseContext)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DatabaseContext databaseContext, ILogger logger)
         {
             var initializers = app.ApplicationServices.GetServices<IAsyncInitialized>();
             foreach (var initializer in initializers)
             {
                 initializer.Initialize().GetAwaiter().GetResult();
+                logger.LogInformation("Initialization of {ServiceTypeName} completed", initializer.GetType().Name);
             }
 
             databaseContext.Database.EnsureCreated();
+            logger.LogInformation("Database created");
             
+            app.UseHangfireDashboard("/dashboard", new DashboardOptions
+            {
+                Authorization = new [] { new HangfireCustomBasicAuthenticationFilter{ User = "memester", Pass = "memesterdev" } }
+            });
 
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseHangfireDashboard("/dashboard");
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Memester API"));
             }
