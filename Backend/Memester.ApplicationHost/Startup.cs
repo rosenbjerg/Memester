@@ -82,17 +82,17 @@ namespace Memester
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DatabaseContext databaseContext, ILogger logger)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DatabaseContext databaseContext)
         {
             var initializers = app.ApplicationServices.GetServices<IAsyncInitialized>();
             foreach (var initializer in initializers)
             {
                 initializer.Initialize().GetAwaiter().GetResult();
-                logger.LogInformation("Initialization of {ServiceTypeName} completed", initializer.GetType().Name);
+                Console.WriteLine($"Initialization of {initializer.GetType().Name} completed");
             }
 
             databaseContext.Database.EnsureCreated();
-            logger.LogInformation("Database created");
+            Console.WriteLine("Database created");
             
             app.UseHangfireDashboard("/dashboard", new DashboardOptions
             {
