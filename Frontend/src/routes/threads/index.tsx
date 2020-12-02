@@ -17,7 +17,7 @@ export default class ThreadOverviewPage extends Component<any, State> {
     }
 
     render(_, { threads }: State) {
-        if (threads === undefined) return <Loading />;
+        if (threads === undefined) return <Loading title={'Loading threads'} />;
 
         return (
             <div>

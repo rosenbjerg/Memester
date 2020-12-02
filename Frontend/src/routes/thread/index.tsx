@@ -21,7 +21,7 @@ export default class ThreadPage extends Component<Props, State> {
             .then(thread => this.setState({ thread }));
     }
 
-    render(props: Props, { thread }: State) {
+    render(_: Props, { thread }: State) {
         if (thread === undefined) return <Loading title={"Fetching threads"}/>;
 
         return (

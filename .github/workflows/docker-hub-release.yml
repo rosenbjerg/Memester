@@ -29,7 +29,8 @@ jobs:
             --build-arg build="$MEMESTER_BUILD" \
             --output "type=image,push=false" \
             --tag mrosenbjerg/memester:"$MEMESTER_BUILD-alpine" \
-            ./Docker/Build/amd64
+            -f ./Docker/Build/amd64/Dockerfile \
+            .
       -
         name: Push new image
         run: |

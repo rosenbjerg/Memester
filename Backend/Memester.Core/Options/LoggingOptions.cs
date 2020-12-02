@@ -7,7 +7,5 @@ namespace Memester.Core.Options
     {
         [Required]
         public LogEventLevel LogLevel { get; set; }
-
-        [Required] public string Directory { get; set; } = null!;
     }
 }
