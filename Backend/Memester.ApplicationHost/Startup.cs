@@ -13,6 +13,7 @@ using Memester.Core;
 using Memester.Core.Options;
 using Memester.Database;
 using Memester.FileStorage;
+using Memester.Middleware;
 using Memester.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -26,6 +27,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
+using NxPlx.ApplicationHost.Api.Logging;
+using Serilog.Core;
 using SessionOptions = Memester.Core.Options.SessionOptions;
 
 namespace Memester
@@ -72,6 +75,7 @@ namespace Memester
             services.AddScoped(typeof(IndexingService));
             services.AddScoped(typeof(FileStorageService));
             services.AddScoped(typeof(AuthenticationService));
+            services.AddScoped<ILogEventEnricher, CommonEventEnricher>();
             
             services.AddSingleton(typeof(IEmailService), typeof(MailkitEmailService));
             services.AddSingleton(typeof(SessionService));
@@ -94,6 +98,9 @@ namespace Memester
             databaseContext.Database.EnsureCreated();
             Console.WriteLine("Database created");
             
+            app.UseMiddleware<LoggingEnrichingMiddleware>();
+            app.UseMiddleware<ExceptionInterceptorMiddleware>();
+            app.UseMiddleware<PerformanceInterceptorMiddleware>();
             app.UseHangfireDashboard("/dashboard", new DashboardOptions
             {
                 Authorization = new [] { new HangfireCustomBasicAuthenticationFilter{ User = "memester", Pass = "memesterdev" } }
