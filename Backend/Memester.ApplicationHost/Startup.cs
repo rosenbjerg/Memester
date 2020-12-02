@@ -86,7 +86,7 @@ namespace Memester
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DatabaseContext databaseContext)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider provider)
         {
             var initializers = app.ApplicationServices.GetServices<IAsyncInitialized>();
             foreach (var initializer in initializers)
@@ -95,8 +95,12 @@ namespace Memester
                 Console.WriteLine($"Initialization of {initializer.GetType().Name} completed");
             }
 
-            databaseContext.Database.EnsureCreated();
-            Console.WriteLine("Database created");
+            using (var scope = provider.CreateScope())
+            {
+                var databaseContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
+                databaseContext.Database.EnsureCreated();
+                Console.WriteLine("Database created");
+            }
             
             app.UseMiddleware<LoggingEnrichingMiddleware>();
             app.UseMiddleware<ExceptionInterceptorMiddleware>();
