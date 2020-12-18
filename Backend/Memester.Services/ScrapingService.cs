@@ -52,7 +52,7 @@ namespace Memester.Services
 #if DEBUG
             var ids = root.SelectMany(p => p.Threads.Select(t => t.Number)).Skip(1).Take(10).ToArray();
 #else
-            var ids = root.SelectMany(p => p.Threads.Select(t => t.Number)).Skip(1).ToArray();
+            var ids = root.SelectMany(p => p.Threads.Select(t => t.Number)).Skip(1).Take(20).ToArray();
 #endif
             foreach (var threadId in ids)
                 BackgroundJob.Enqueue<ScrapingService>(service => service.IndexThread(board, threadId));
