@@ -1,7 +1,7 @@
 ﻿FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS backendBuilder
 WORKDIR /app
 COPY ./Backend/ ./
-RUN dotnet publish Memester.ApplicationHost/Memester.ApplicationHost.csproj -c Release -r linux-musl-x64 -o build
+RUN dotnet publish Memester.ApplicationHost/Memester.ApplicationHost.csproj -c Release -r linux-x64 -o build
 
 
 FROM node:12-buster-slim AS frontendBuilder
