@@ -52,7 +52,7 @@ namespace Memester.Services
 #if DEBUG
             var ids = root.SelectMany(p => p.Threads.Select(t => t.Number)).Skip(1).Take(10).ToArray();
 #else
-            var ids = root.SelectMany(p => p.Threads.Select(t => t.Number)).Skip(1).Take(20).ToArray();
+            var ids = root.SelectMany(p => p.Threads.Select(t => t.Number)).Skip(1).Take(25).ToArray();
 #endif
             foreach (var threadId in ids)
                 BackgroundJob.Enqueue<ScrapingService>(service => service.IndexThread(board, threadId));
@@ -116,7 +116,7 @@ namespace Memester.Services
 #if DEBUG
             var posts = rootPost.posts.Where(p => !existingMemes.Contains(p.Number) && p.FileId != 0 && p.Extension == ".webm").Take(5).ToList();
 #else
-            var posts = rootPost.posts.Where(p => !existingMemes.Contains(p.Number) && p.FileId != 0 && p.Extension == ".webm").Take(20).ToList();
+            var posts = rootPost.posts.Where(p => !existingMemes.Contains(p.Number) && p.FileId != 0 && p.Extension == ".webm").Take(25).ToList();
 #endif
             var downloadedMemes = new List<Meme>();
             foreach (var post in posts)
