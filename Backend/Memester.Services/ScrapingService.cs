@@ -137,11 +137,14 @@ namespace Memester.Services
             }
 
             if (!downloadedMemes.Any())
+            {
+                _logger.LogInformation("No downloadable memes found for {ThreadId}", threadId);
                 return;
+            }
             
             _databaseContext.AddRange(downloadedMemes);
             await _databaseContext.SaveChangesAsync();
-            
+            _logger.LogInformation("Added {MemeCount} memes to {ThreadId}", downloadedMemes.Count, threadId);
         }
 
         private async Task<bool> TryDownloadWebm(long fileId, long memeId)
