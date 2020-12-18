@@ -33,7 +33,7 @@ namespace Memester.Controllers
         [HttpGet("{threadId}")]
         public async Task<FullThreadDto> GetMemes([FromRoute, Required]long threadId)
         {
-            var t =  await _databaseContext.Threads.Where(t => t.Id == threadId).Select(t => new FullThreadDto
+            return await _databaseContext.Threads.Where(t => t.Id == threadId).Select(t => new FullThreadDto
             {
                 Id = t.Id,
                 Name = t.Name,
@@ -43,8 +43,6 @@ namespace Memester.Controllers
                     Id = m.Id
                 })
             }).FirstOrDefaultAsync();
-
-            return t;
         }
     }
 }
