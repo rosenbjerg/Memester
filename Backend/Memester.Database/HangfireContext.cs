@@ -11,12 +11,6 @@ namespace Memester.Database
             using var context = new HangfireContext(connectionString);
             context.Database.EnsureCreated();
         }
-        public static void EnsureRecreated(string connectionString)
-        {
-            using var context = new HangfireContext(connectionString);
-            context.Database.EnsureDeleted();
-            context.Database.EnsureCreated();
-        }
 
         private HangfireContext(string connectionString)
         {

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
@@ -61,7 +62,7 @@ namespace Memester
             services.AddHangfire(ConfigureHangfire);
             services.AddHangfireServer(options =>
             {
-                options.WorkerCount = Math.Min(Environment.ProcessorCount * 2 - 1, 16);
+                options.WorkerCount = Math.Min(Environment.ProcessorCount * 3 - 1, 10);
                 options.Queues = JobQueues.All;
             });
             
@@ -98,8 +99,10 @@ namespace Memester
             using (var scope = provider.CreateScope())
             {
                 var databaseContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
-                databaseContext.Database.EnsureCreated();
-                Console.WriteLine("Database created");
+                var migrations = databaseContext.Database.GetPendingMigrations().Count();
+                Console.WriteLine($"Applying {migrations} migrations");
+                databaseContext.Database.Migrate();
+                Console.WriteLine("Database migrated");
             }
             
             app.UseMiddleware<LoggingEnrichingMiddleware>();
