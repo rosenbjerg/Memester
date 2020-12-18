@@ -15,6 +15,7 @@ using Memester.Core.Options;
 using Memester.Database;
 using Memester.FileStorage;
 using Memester.Middleware;
+using Memester.Models;
 using Memester.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -103,6 +104,13 @@ namespace Memester
                 Console.WriteLine($"Applying {migrations} migrations");
                 databaseContext.Database.Migrate();
                 Console.WriteLine("Database migrated");
+                databaseContext.Add(new User
+                {
+                    Admin = false,
+                    Email = "hej@memester.club",
+                    Created = DateTime.UtcNow
+                });
+                databaseContext.SaveChanges();
             }
             
             app.UseMiddleware<LoggingEnrichingMiddleware>();
