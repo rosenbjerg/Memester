@@ -63,7 +63,7 @@ namespace Memester
             services.AddHangfire(ConfigureHangfire);
             services.AddHangfireServer(options =>
             {
-                options.WorkerCount = Math.Min(Environment.ProcessorCount * 5 - 1, 15);
+                options.WorkerCount = Math.Min(Environment.ProcessorCount * 5 - 1, 10);
                 options.Queues = JobQueues.All;
             });
             
@@ -71,17 +71,18 @@ namespace Memester
             
             services.AddDbContext<DatabaseContext>(options => options.UseNpgsql(_configuration.GetConnectionString("Pgsql"), b => b.MigrationsAssembly(typeof(DatabaseContext).Assembly.FullName)));
             
-            services.AddScoped(typeof(OperationContext), _ => new OperationContext());
-            services.AddScoped(typeof(IHttpSessionService), typeof(CookieSessionService));
-            services.AddScoped(typeof(ScrapingService));
-            services.AddScoped(typeof(IndexingService));
-            services.AddScoped(typeof(FileStorageService));
-            services.AddScoped(typeof(AuthenticationService));
+            services.AddScoped(_ => new OperationContext());
+            services.AddScoped<IHttpSessionService, CookieSessionService>();
+            services.AddScoped<ScrapingService>();
+            services.AddScoped<IndexingService>();
+            services.AddScoped<FileStorageService>();
+            services.AddScoped<MemeService>();
+            services.AddScoped<AuthenticationService>();
             services.AddScoped<ILogEventEnricher, CommonEventEnricher>();
             
-            services.AddSingleton(typeof(IEmailService), typeof(MailkitEmailService));
-            services.AddSingleton(typeof(SessionService));
-            services.AddSingleton(typeof(Random));
+            services.AddSingleton<IEmailService, MailkitEmailService>();
+            services.AddSingleton<SessionService>();
+            services.AddSingleton<Random>();
 
             services.AddTransient<IAsyncInitialized, FileStorageService>();
             // services.AddTransient<IAsyncInitialized, DatabaseContext>();

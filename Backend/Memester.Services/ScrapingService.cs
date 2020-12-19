@@ -24,6 +24,7 @@ namespace Memester.Services
 {
     public class ScrapingService
     {
+        private readonly MemeService _memeService;
         private readonly DatabaseContext _databaseContext;
         private readonly FileStorageService _fileStorageService;
         private readonly ILogger<ScrapingService> _logger;
@@ -34,12 +35,12 @@ namespace Memester.Services
         private const string ThreadsUrl = "https://a.4cdn.org/{BOARD}/threads.json";
         private const string ThreadUrl = "https://a.4cdn.org/{BOARD}/thread/{THREAD}.json";
 
-        public ScrapingService(DatabaseContext databaseContext, FileStorageService fileStorageService , IConfiguration configuration, ILogger<ScrapingService> logger)
-        {    
+        public ScrapingService(MemeService memeService, DatabaseContext databaseContext, FileStorageService fileStorageService , IConfiguration configuration, ILogger<ScrapingService> logger)
+        {
+            _memeService = memeService;
             _databaseContext = databaseContext;
             _fileStorageService = fileStorageService;
             _logger = logger;
-            var foldersSection = configuration.GetSection("Folders");
             _maxCapacityBytes = long.Parse(configuration["MaxCapacityBytes"]);
         }
         
@@ -65,35 +66,25 @@ namespace Memester.Services
             var memeSizePairs = await _databaseContext.Memes.OrderBy(m => m.Created)
                 .Select(m => new { Id = m.Id, ThreadId = m.ThreadId, Size = m.FileSize }).ToListAsync();
             var sum = memeSizePairs.Sum(m => (long)m.Size);
-            var toDelete = new List<long>();
             foreach (var memeSizePair in memeSizePairs)
             {
                 if (sum < _maxCapacityBytes) break;
                 try
                 {
-                    await _fileStorageService.Delete($"meme{memeSizePair.Id}.webm");
-                    await _fileStorageService.Delete($"meme{memeSizePair.Id}.jpeg");
+                    await _memeService.DeleteMeme(memeSizePair.Id);
                     sum -= memeSizePair.Size;
-                    toDelete.Add(memeSizePair.Id);
                 }
                 catch (Exception)
                 {
                     _logger.LogError("Could not delete meme {MemeId}", memeSizePair.Id);
-                    toDelete.Remove(memeSizePair.Id);
                 }
             }
-
-            var memesToDelete = await _databaseContext.Memes.Where(m => toDelete.Contains(m.Id)).ToListAsync();
-            _databaseContext.RemoveRange(memesToDelete);
-            await _databaseContext.SaveChangesAsync();
-            _logger.LogInformation("Deleted {DeletedMemes} memes", memesToDelete.Count);
-            
         }
         
         [Queue(JobQueues.ThreadIndexing)]
         public async Task IndexThread(string board, long threadId)
         {
-            var rootPost = await DownloadThreadPosts(board, threadId);
+            var rootPost = await FetchThreadPosts(board, threadId);
             if (rootPost == null) return;
             
             var firstPost = rootPost.posts.First();
@@ -106,11 +97,23 @@ namespace Memester.Services
                     Id = threadId,
                     Name = WebUtility.HtmlDecode(HtmlTrimmer.Replace(firstPost.Commentary ?? firstPost.Filename ?? string.Empty, string.Empty)),
                     Created = DateTime.UtcNow,
+                    Memes = new List<Meme>()
                 };
                 _databaseContext.Add(thread);
             }
-
-            thread.Memes ??= new List<Meme>();
+            else
+            {
+                var currentMemeIds = rootPost.posts.Select(p => p.FileId).ToList();
+                var removedMemeIds = await _databaseContext.Memes
+                    .Where(m => m.ThreadId == threadId && !currentMemeIds.Contains(m.FileId) && m.Votes.Count == 0)
+                    .Select(m => m.Id)
+                    .ToListAsync();
+                foreach (var memeId in removedMemeIds)
+                {
+                    await _memeService.DeleteMeme(memeId);
+                }
+                _logger.LogInformation("Removed {DeletedMemeCount} memes", removedMemeIds.Count);
+            }
 
             var existingMemes = await _databaseContext.Memes.Where(m => m.ThreadId == threadId).Select(m => m.Id).ToListAsync();
 #if DEBUG
@@ -222,7 +225,7 @@ namespace Memester.Services
             return await response.Content.ReadAsStreamAsync();
         }
 
-        private async Task<ChanPostRoot?> DownloadThreadPosts(string board, long thread)
+        private async Task<ChanPostRoot?> FetchThreadPosts(string board, long thread)
         {
             var response = await Client.GetAsync(ThreadUrl.Replace("{BOARD}", board).Replace("{THREAD}", thread.ToString()));
             var jsonStream = await response.Content.ReadAsStringAsync();
