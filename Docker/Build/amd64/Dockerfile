@@ -1,35 +1,22 @@
-﻿FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS backendBuilder
+﻿FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS backendBuilder
 WORKDIR /app
 COPY ./Backend/ ./
-RUN dotnet publish Memester.ApplicationHost/Memester.ApplicationHost.csproj -c Release -r linux-x64 -o build
+RUN dotnet publish Memester.ApplicationHost/Memester.ApplicationHost.csproj -c Release -r linux-musl-x64 -o build
 
 
-FROM node:12-buster-slim AS frontendBuilder
+FROM node:14-alpine AS frontendBuilder
 WORKDIR /app
 COPY ./Frontend/ ./
 RUN yarn install --frozen-lockfile --no-progress --silent
 RUN yarn build
 
 
-FROM debian:buster-slim AS runtime
+FROM alpine AS runtime
 ARG build
 LABEL maintainer="rosenbjerg, jbaagaard"
 LABEL description="Memester"
 LABEL repository="github.com/rosenbjerg/Memester"
-RUN apt-get update \
-&& apt-get install -y --no-install-recommends \
-        ca-certificates \
-        curl \
-        jq \
-        git \
-        iputils-ping \
-        libcurl4 \
-        libicu63 \
-        libunwind8 \
-        netcat \
-        libssl1.0 \
-        ffmpeg \
-        imagemagick
+RUN apk add --update --no-cache --no-progress ca-certificates curl libcurl libunwind openssl ffmpeg imagemagick
 WORKDIR /app
 COPY --from=backendBuilder /app/build ./
 COPY --from=frontendBuilder /app/build ./public/
