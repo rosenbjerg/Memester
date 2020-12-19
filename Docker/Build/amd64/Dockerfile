@@ -16,7 +16,7 @@ ARG build
 LABEL maintainer="rosenbjerg, jbaagaard"
 LABEL description="Memester"
 LABEL repository="github.com/rosenbjerg/Memester"
-RUN apk add --update --no-cache --no-progress ca-certificates curl libcurl libunwind openssl ffmpeg imagemagick
+RUN apk add --update --no-cache --no-progress ca-certificates ffmpeg imagemagick
 WORKDIR /app
 COPY --from=backendBuilder /app/build ./
 COPY --from=frontendBuilder /app/build ./public/
