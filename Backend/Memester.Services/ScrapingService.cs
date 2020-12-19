@@ -148,6 +148,12 @@ namespace Memester.Services
             _databaseContext.AddRange(downloadedMemes);
             await _databaseContext.SaveChangesAsync();
             _logger.LogInformation("Added {MemeCount} memes to {ThreadId}", downloadedMemes.Count, threadId);
+            
+            if (!await _databaseContext.Memes.AnyAsync(m => m.ThreadId == threadId))
+            {
+                _databaseContext.Remove(thread);
+                await _databaseContext.SaveChangesAsync();
+            }
         }
 
         private async Task<bool> TryDownloadWebm(long fileId, long memeId)
