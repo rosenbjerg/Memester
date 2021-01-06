@@ -119,7 +119,7 @@ namespace Memester.Services
 #if DEBUG
             var posts = rootPost.posts.Where(p => !existingMemes.Contains(p.Number) && p.FileId != 0 && p.Extension == ".webm").Take(5).ToList();
 #else
-            var posts = rootPost.posts.Where(p => !existingMemes.Contains(p.Number) && p.FileId != 0 && p.Extension == ".webm").Take(25).ToList();
+            var posts = rootPost.posts.Where(p => !existingMemes.Contains(p.Number) && p.FileId != 0 && p.Extension == ".webm").ToList();
 #endif
             var downloadedMemes = new List<Meme>();
             foreach (var post in posts)

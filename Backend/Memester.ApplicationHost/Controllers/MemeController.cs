@@ -27,7 +27,7 @@ namespace Memester.Controllers
         {
             var threadIds = threadId != null
                 ? new[] { threadId.Value }
-                : await _databaseContext.Threads.Select(t => t.Id).ToArrayAsync();
+                : await _databaseContext.Threads.Where(t => t.Memes.Any()).Select(t => t.Id).ToArrayAsync();
 
             var randomThreadIndex = _random.Next(0, threadIds.Length - 1);
             var randomThreadId = threadIds[randomThreadIndex];

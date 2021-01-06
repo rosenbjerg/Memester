@@ -23,7 +23,9 @@ namespace Memester.Controllers
         [HttpGet("")]
         public Task<List<ThreadDto>> GetThreads()
         {
-            return _databaseContext.Threads.Select(t => new ThreadDto
+            return _databaseContext.Threads
+                .Where(t => t.Memes.Any())
+                .Select(t => new ThreadDto
             {
                 Id = t.Id,
                 Name = t.Name
