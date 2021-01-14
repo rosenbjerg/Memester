@@ -25,6 +25,7 @@ namespace Memester.Services
     public class ScrapingService
     {
         private readonly MemeService _memeService;
+        private readonly MemeDeletionService _memeDeletionService;
         private readonly DatabaseContext _databaseContext;
         private readonly FileStorageService _fileStorageService;
         private readonly ILogger<ScrapingService> _logger;
@@ -35,9 +36,10 @@ namespace Memester.Services
         private const string ThreadsUrl = "https://a.4cdn.org/{BOARD}/threads.json";
         private const string ThreadUrl = "https://a.4cdn.org/{BOARD}/thread/{THREAD}.json";
 
-        public ScrapingService(MemeService memeService, DatabaseContext databaseContext, FileStorageService fileStorageService , IConfiguration configuration, ILogger<ScrapingService> logger)
+        public ScrapingService(MemeService memeService, MemeDeletionService memeDeletionService, DatabaseContext databaseContext, FileStorageService fileStorageService , IConfiguration configuration, ILogger<ScrapingService> logger)
         {
             _memeService = memeService;
+            _memeDeletionService = memeDeletionService;
             _databaseContext = databaseContext;
             _fileStorageService = fileStorageService;
             _logger = logger;
@@ -50,36 +52,46 @@ namespace Memester.Services
             var response = await Client.GetAsync(ThreadsUrl.Replace("{BOARD}", board));
             var jsonStream = await response.Content.ReadAsStringAsync();
             var root = JsonSerializer.Deserialize<List<ChanThreadRoot>>(jsonStream);
+            
 #if DEBUG
             var ids = root.SelectMany(p => p.Threads.Select(t => t.Number)).Skip(1).Take(10).ToArray();
 #else
-            var ids = root.SelectMany(p => p.Threads.Select(t => t.Number)).Skip(1).Take(25).ToArray();
+            var ids = root.SelectMany(p => p.Threads.Select(t => t.Number)).Skip(1).Take(15).ToArray();
 #endif
             foreach (var threadId in ids)
                 BackgroundJob.Enqueue<ScrapingService>(service => service.IndexThread(board, threadId));
             BackgroundJob.Enqueue<ScrapingService>(service => service.EnforceMaxCapacity());
         }
+
+        private IEnumerable<Thread> FilterThreads(IEnumerable<Thread> threads)
+        {
+            var bannedTitleWords = new List<string>
+            {
+                "incel", "coomer"
+                
+            };
+            return threads
+                .Where(t => t.Memes.Any())
+                .Where(t => !bannedTitleWords.Any(w => t.Name.Contains($" {w} ")));
+        }
         
         [Queue(JobQueues.DiskCleanup)]
         public async Task EnforceMaxCapacity()
         {
-            var memeSizePairs = await _databaseContext.Memes.OrderBy(m => m.Created)
-                .Select(m => new { Id = m.Id, ThreadId = m.ThreadId, Size = m.FileSize }).ToListAsync();
-            var sum = memeSizePairs.Sum(m => (long)m.Size);
-            foreach (var memeSizePair in memeSizePairs)
+            var ids = await _memeDeletionService.DetermineMemesToDelete(_maxCapacityBytes);
+            foreach (var id in ids)
             {
-                if (sum < _maxCapacityBytes) break;
                 try
                 {
-                    await _memeService.DeleteMeme(memeSizePair.Id);
-                    sum -= memeSizePair.Size;
+                    await _memeService.DeleteMeme(id);
                 }
                 catch (Exception)
                 {
-                    _logger.LogError("Could not delete meme {MemeId}", memeSizePair.Id);
+                    _logger.LogError("Could not delete meme {MemeId}", id);
                 }
             }
         }
+
         
         [Queue(JobQueues.ThreadIndexing)]
         public async Task IndexThread(string board, long threadId)
