@@ -4,10 +4,8 @@
 	width: 100%;
 	height: 56px;
 	padding: 0;
-	background: var(--themeDarkblue);
-	box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
 	z-index: 50;
-
+	position: fixed;
 }
 
 .header h1 {
@@ -18,7 +16,6 @@
 	line-height: 56px;
 	font-weight: 300;
 	color: var(--themeWhite);
-	font-size: 24px;
 }
 
 .header nav {

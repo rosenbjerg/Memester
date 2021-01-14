@@ -89,7 +89,7 @@ export default class MemePage extends Component<Props, State> {
                             }}
                         >
                             <source
-                                src={`/api/file/${meme.id}/webm`}
+                                src={`https://memester.club/api/file/${meme.id}/webm`}
                                 type={"video/webm"}
                             />
                             {/*<source src={`/api/memes/${this.props.threadId}/${this.props.memeId}/video`} type={"video/webm"}/>*/}
@@ -102,9 +102,6 @@ export default class MemePage extends Component<Props, State> {
                             {/*</div>*/}
                             <button className={`${style.copyButton}`} onClick={function() {
                                 navigator.clipboard.writeText(window.location.href);
-                                setTimeout(function() {
-
-                                }, 300)
                                 return (<CopiedText />)
                             }}>COPY LINK!
                             </button>

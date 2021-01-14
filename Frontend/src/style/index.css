@@ -1,9 +1,9 @@
 :root{
-	--themeBlack: #000;
-	--themeDarkblue: #070c20;
-	--themeBlue: #0e1e3b;
+	--themeBlack: #222831;
+	--themeBlue: #30475e;
 	--themeWhite: #DCDCDC;
 	--themeGreen: #06D6A0;
+	--themeRed: #f05454;
 }
 
 html, body {
@@ -12,7 +12,6 @@ html, body {
 	padding: 0;
 	margin: 0;
 	background: var(--themeBlack);
-	font-family: 'Helvetica Neue', arial, sans-serif;
 	font-weight: 300;
 	color: var(--themeWhite);
 	-webkit-font-smoothing: antialiased;
@@ -24,7 +23,8 @@ html, body {
 @import "resets.css";
 
 * {
-	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
 }
 
 #app {

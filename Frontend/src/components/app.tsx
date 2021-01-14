@@ -7,6 +7,7 @@ import MemePage from "../routes/meme";
 import ThreadPage from "../routes/thread";
 import ThreadOverviewPage from "../routes/threads";
 import LandingPage from "../routes/landingPage";
+import Login from "../routes/login";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 if ((module as any).hot) {
@@ -27,6 +28,7 @@ const App: FunctionalComponent = () => {
                     <Route path="/overview" component={ThreadOverviewPage} />
                     <Route path="/:threadId" component={ThreadPage} />
                     <Route path="/:threadId/:memeId" component={MemePage} />
+                    <Route path="/login" component={Login} />
                     <NotFoundPage default />
                 </Router>
             </div>
