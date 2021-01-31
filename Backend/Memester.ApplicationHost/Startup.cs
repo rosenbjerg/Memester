@@ -74,6 +74,7 @@ namespace Memester
             services.AddScoped(_ => new OperationContext());
             services.AddScoped<IHttpSessionService, CookieSessionService>();
             services.AddScoped<ScrapingService>();
+            services.AddScoped<MemeDeletionService>();
             services.AddScoped<IndexingService>();
             services.AddScoped<FileStorageService>();
             services.AddScoped<MemeService>();
