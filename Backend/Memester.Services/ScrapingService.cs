@@ -178,15 +178,15 @@ namespace Memester.Services
 
             foreach (var url in urlsToTry)
             {
-                using var response = await Client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
-                if (!response.IsSuccessStatusCode) continue;
-                
                 var tempMemePath = Path.Combine(Path.GetTempPath(), $"{Path.GetTempFileName()}.webm");
                 var snapshotPath = Path.Combine(Path.GetTempPath(), $"{Path.GetTempFileName()}.png");
                 var thumbnailPath = Path.Combine(Path.GetTempPath(), $"{Path.GetTempFileName()}.jpeg");
                 
                 try
                 {
+                    using var response = await Client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                    if (!response.IsSuccessStatusCode) continue;
+                    
                     await using (var webmInputStream = await response.Content.ReadAsStreamAsync())
                     await using (var tempFileOutput = File.Create(tempMemePath))
                     {
